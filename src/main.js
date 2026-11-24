@@ -127,6 +127,33 @@ document.addEventListener('click', (e) => {
   }
 });
 $('#menuBtn').addEventListener('click', () => body.classList.toggle('menu-open'));
+document.querySelectorAll('.nav a[href^="#"]').forEach((a) => a.addEventListener('click', () => body.classList.remove('menu-open')));
+document.querySelector('.nav-drop button').addEventListener('click', (e) => e.currentTarget.parentElement.classList.toggle('open'));
+
+// Teklif formu → WhatsApp veya e-posta (backend gerektirmez)
+const quoteForm = $('#quoteForm');
+function quoteText() {
+  const f = new FormData(quoteForm);
+  return [
+    'Merhaba, özel üretim teklifi almak istiyorum.',
+    `Ürün: ${f.get('urun')}`,
+    `Ölçü: ${f.get('olcu')}`,
+    `Teslimat ili: ${f.get('il')}`,
+    f.get('ahsap') ? `Ahşap / renk: ${f.get('ahsap')}` : '',
+    f.get('not') ? `Not: ${f.get('not')}` : '',
+    `Ad: ${f.get('ad')}`,
+  ]
+    .filter(Boolean)
+    .join('\n');
+}
+quoteForm.addEventListener('submit', (e) => {
+  e.preventDefault();
+  open(`${WHATSAPP}?text=${encodeURIComponent(quoteText())}`, '_blank', 'noopener');
+});
+$('#quoteMail').addEventListener('click', () => {
+  if (!quoteForm.reportValidity()) return;
+  location.href = `mailto:contact@hwcfurniture.com?subject=${encodeURIComponent('Özel üretim teklif talebi')}&body=${encodeURIComponent(quoteText())}`;
+});
 
 // ---------------------------------------------------------------------------
 // Showroom durumu
@@ -184,7 +211,7 @@ try {
   console.warn('3D devre dışı:', err);
   engine = new NoEngine();
 }
-if (import.meta.env.DEV) window.__hwc = { engine, bayState, open: (h) => openInShowroom(h) };
+if (import.meta.env.DEV) window.__hwc = { engine, bayState, open: (h) => openInShowroom(h), bayConfig, STATIONS, PRODUCTS, STATION_OF, defaultSelection };
 const loaderBar = $('#loaderBar');
 
 engine.addEventListener('state', (e) => {

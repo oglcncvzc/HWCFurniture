@@ -242,15 +242,24 @@ function legsBlade(g, D, h, mat, hubMat) {
   const R = D / 2;
   const hubY = h - 0.15;
   const footR = R * 0.8;
+  // alt bacak: göbekten (0.06, hubY) ayağa (footR, 0) incelen düz bıçak
+  const dx = footR - 0.06;
+  const dy = -hubY;
+  const len = Math.hypot(dx, dy);
+  const nx = -dy / len; // yukarı-dışa bakan normal
+  const ny = dx / len;
+  const w0 = 0.062;
+  const w1 = 0.03;
   const s = new THREE.Shape();
-  s.moveTo(footR + 0.012, 0);
-  s.lineTo(footR - 0.034, 0);
-  s.quadraticCurveTo(R * 0.36, hubY * 0.42, 0.06, hubY - 0.075);
-  s.lineTo(0.06, hubY + 0.05);
-  s.quadraticCurveTo(0.1, h - 0.015, R * 0.3, h);
-  s.lineTo(R * 0.5, h);
-  s.quadraticCurveTo(0.22, hubY + 0.03, 0.2, hubY - 0.05);
-  s.quadraticCurveTo(R * 0.52, hubY * 0.5, footR + 0.012, 0);
+  s.moveTo(footR + nx * w1 * 0.5, ny * w1 * 0.5);
+  s.lineTo(footR - nx * w1 * 0.5, Math.max(0, -ny * w1 * 0.5));
+  s.lineTo(0.06 - nx * w0 * 0.5 * 0.2, hubY - 0.07);
+  s.lineTo(0.06, hubY + 0.055);
+  // tablaya uzanan kol
+  s.quadraticCurveTo(0.12, h - 0.02, R * 0.36, h);
+  s.lineTo(R * 0.47, h);
+  s.quadraticCurveTo(0.2, hubY + 0.06, 0.06 + nx * w0 + (dx / len) * 0.06, hubY + ny * w0 + (dy / len) * 0.06);
+  s.lineTo(footR + nx * w1 * 0.5, ny * w1 * 0.5);
   const depth = 0.036;
   const geo = new THREE.ExtrudeGeometry(s, { depth, bevelEnabled: true, bevelThickness: 0.004, bevelSize: 0.004, bevelSegments: 2, curveSegments: 18 });
   geo.translate(0, 0, -depth / 2);
@@ -261,8 +270,8 @@ function legsBlade(g, D, h, mat, hubMat) {
     m.rotation.y = -ang;
     g.add(m);
   }
-  const hub = mesh(new THREE.CylinderGeometry(0.075, 0.075, 0.13, 32), hubMat);
-  hub.position.y = hubY - 0.01;
+  const hub = mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.16, 32), hubMat);
+  hub.position.y = hubY;
   g.add(hub);
 }
 
@@ -407,7 +416,7 @@ export function buildTable(visual, dims, mats) {
     const tables = model === 'sidePair' ? [{ x: -0.27, z: 0.05, h: 0.53 }, { x: 0.27, z: -0.05, h: 0.48 }] : [{ x: 0, z: 0, h: 0.53 }];
     for (const s of tables) {
       const sub = new THREE.Group();
-      const t = 0.032;
+      const t = 0.036;
       const top = mesh(makeTop('round', L, W, t), mats.top);
       top.position.y = s.h - t;
       sub.add(top);
@@ -417,8 +426,8 @@ export function buildTable(visual, dims, mats) {
       // 3 konik ayak
       for (let i = 0; i < 3; i++) {
         const a = (i / 3) * Math.PI * 2;
-        const top3 = new THREE.Vector3(Math.cos(a) * 0.13, s.h - t, Math.sin(a) * 0.13);
-        const bot = new THREE.Vector3(Math.cos(a) * 0.24, 0, Math.sin(a) * 0.24);
+        const top3 = new THREE.Vector3(Math.cos(a) * 0.14, s.h - t, Math.sin(a) * 0.14);
+        const bot = new THREE.Vector3(Math.cos(a) * 0.27, 0, Math.sin(a) * 0.27);
         const dir = new THREE.Vector3().subVectors(top3, bot);
         const len = dir.length();
         const leg = mesh(planarUV(new THREE.CylinderGeometry(0.02, 0.012, len, 16), 0.6, 0.3), mats.legWood);
@@ -448,7 +457,7 @@ export function buildTable(visual, dims, mats) {
     legsTapered(g, L, W, H - t, mats.legWood, null, 0.06);
   } else {
     // rect / live / river
-    const t = model === 'rect' ? 0.04 : 0.05;
+    const t = model === 'rect' ? 0.045 : 0.05;
     topY = H;
     const kind = visual.top || (model === 'live' ? 'live' : 'rect');
     if (visual.clearEdges) {

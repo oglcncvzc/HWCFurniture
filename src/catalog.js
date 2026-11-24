@@ -68,7 +68,7 @@ const VISUALS = {
     seed: 8,
     legs: 'metalX',
     finish: 'gloss',
-    surface: { wood: 'ceviz', seed: 8, river: { color: 'okyanus' } },
+    surface: { wood: 'ceviz', seed: 8, river: { color: 'okyanus', width: 0.9 } },
   }),
   'koyu-yesil-epoksi-dogal-kenar-ceviz-yemek-masasi-mutfak-masasi-calisma-masasi-ofis-masasi': () => ({
     model: 'river',
@@ -129,18 +129,23 @@ const VISUALS = {
     finish: 'gloss',
     surface: { wood: 'igde', seed: 81, islands: { color: 'gokMavi', wood: 0.5 }, size: [1024, 680] },
   }),
-  'masif-ahsap-mavi-epoksi-sehpa': side('igde', { islands: { color: 'mavi', wood: 0.42 }, seed: 91 }),
-  'masif-ahsap-siyah-epoksi-sehpa': side('igde', { islands: { color: 'siyah', wood: 0.72 }, seed: 92 }),
-  'masif-ahsap-yesil-epoksi-sehpa': side('igde', { islands: { color: 'yesil', wood: 0.5 }, seed: 93 }),
-  'mat-yesil-epoksi-igde-yan-sehpa': side('igde', { islands: { color: 'matYesil', wood: 0.55 }, seed: 94, finish: 'matte' }),
+  'masif-ahsap-mavi-epoksi-sehpa': side('igde', { islands: { color: 'mavi', wood: 0.56 }, seed: 91 }),
+  'masif-ahsap-siyah-epoksi-sehpa': side('igdeKoyu', { islands: { color: 'siyah', wood: 0.68, scale: 0.009 }, seed: 92, blackEdge: true }),
+  'masif-ahsap-yesil-epoksi-sehpa': side('igde', { islands: { color: 'yesil', wood: 0.46, scale: 0.008 }, seed: 93 }),
+  'mat-yesil-epoksi-igde-yan-sehpa': () => ({
+    model: 'side',
+    legWood: 'kayinKoyu',
+    finish: 'matte',
+    surface: { wood: 'igde', seed: 94, size: [512, 512], river: { color: 'matYesil', width: 1.5 } },
+  }),
   'ceviz-kok-kaplama-yan-sehpa-parlak': side('cevizKok', { seed: 95, blackEdge: true }),
   'ceviz-kok-kaplama-yan-sehpa-mat': side('cevizKok', { seed: 96, blackEdge: true, finish: 'matte' }),
-  'karaagac-kok-kaplama-yan-sehpa-parlak': side('karaagacKok', { seed: 97, legWood: 'kayin' }),
+  'karaagac-kok-kaplama-yan-sehpa-parlak': side('karaagacKok', { seed: 97, legWood: 'kayinNatur', blackEdge: true }),
   'ceviz-acik-mavi-epoksi-ikili-yan-sehpa-seti': () => ({
     model: 'sidePair',
     legWood: 'kayinKoyu',
     finish: 'gloss',
-    surface: { wood: 'ceviz', seed: 98, river: { color: 'acikMavi' }, size: [512, 512] },
+    surface: { wood: 'cevizKoyu', seed: 98, river: { color: 'acikMavi', width: 0.75 }, size: [512, 512] },
   }),
 };
 

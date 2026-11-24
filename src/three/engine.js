@@ -2,7 +2,6 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
-import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { buildShowroom, BAYS, WALK, ROOM, PLINTH_H, SHADOW_TEX } from './showroom.js';
@@ -46,15 +45,14 @@ export class ShowroomEngine extends EventTarget {
     scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
     scene.environmentIntensity = 0.32;
 
-    this.camera = new THREE.PerspectiveCamera(55, 1, 0.05, 200);
+    this.camera = new THREE.PerspectiveCamera(55, 1, 0.1, 140);
     this.camera.position.copy(OUTSIDE.pos);
     this.camera.lookAt(OUTSIDE.look);
 
     const rt = new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType, samples: 4 });
     this.composer = new EffectComposer(renderer, rt);
     this.composer.addPass(new RenderPass(scene, this.camera));
-    this.bloom = new UnrealBloomPass(new THREE.Vector2(1, 1), 0.22, 0.4, 1.0);
-    this.composer.addPass(this.bloom);
+    // Bloom bilinçli olarak yok: parlak vernik yansımalarında kamera hareketiyle yanıp sönme yapıyordu.
     this.composer.addPass(new OutputPass());
 
     this.controls = new OrbitControls(this.camera, canvas);
@@ -104,7 +102,7 @@ export class ShowroomEngine extends EventTarget {
       this.scene.add(holder);
       const shadow = new THREE.Mesh(
         new THREE.PlaneGeometry(1, 1),
-        new THREE.MeshBasicMaterial({ map: SHADOW_TEX, transparent: true, depthWrite: false, opacity: 0.85 })
+        new THREE.MeshBasicMaterial({ map: SHADOW_TEX, transparent: true, depthWrite: false, opacity: 0.85, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -4 })
       );
       shadow.rotation.x = -Math.PI / 2;
       shadow.position.y = 0.003;
@@ -198,7 +196,6 @@ export class ShowroomEngine extends EventTarget {
     const h = innerHeight;
     this.renderer.setSize(w, h, false);
     this.composer.setSize(w, h);
-    this.bloom.resolution.set(w, h);
     this.camera.aspect = w / h;
     this.camera.fov = w < 700 ? 66 : 55;
     this._applyViewShift();
@@ -497,26 +494,29 @@ export class ShowroomEngine extends EventTarget {
     }
   }
 
-  /** Kare süresi yüksekse çözünürlüğü, sonra bloom'u düşürür. */
+  /** Kare süresi uzun süre yüksekse çözünürlüğü bir kademe düşürür (en fazla 2 kez, 1x altına inmez). */
   _adapt(dt) {
     const p = this.perf;
-    if (p.level >= 3 || dt > 0.5) return;
+    if (p.level >= 2 || dt > 0.25 || this.tweens.size || this.state === 'landing') return;
     p.frames++;
     p.time += dt;
-    if (p.frames < 90) return;
+    if (p.frames < 150) return;
     const avg = p.time / p.frames;
     p.frames = 0;
     p.time = 0;
-    if (avg < 1 / 42) return;
-    p.level++;
+    if (avg < 1 / 32) return;
     const pr = this.renderer.getPixelRatio();
-    if (p.level === 1 && pr > 1.25) this.renderer.setPixelRatio(Math.max(1, pr - 0.5));
-    else if (p.level <= 2) {
-      this.renderer.setPixelRatio(1);
-      this.bloom.enabled = false;
-    } else {
-      this.renderer.setPixelRatio(0.75);
+    if (pr <= 1) {
+      p.level = 2;
+      return;
     }
+    p.level++;
+    this._setPixelRatio(Math.max(1, pr - 0.4));
+  }
+
+  _setPixelRatio(pr) {
+    this.renderer.setPixelRatio(pr);
+    this.composer.setPixelRatio(pr);
     this.resize();
   }
 
@@ -557,7 +557,7 @@ export class ShowroomEngine extends EventTarget {
       this._updateHover();
       for (const b of this.bays) {
         const s = b.holder.parent && this.room.spots[b.index];
-        if (s) s.intensity = damp(s.intensity, s.userData.base * (b.index === this.hovered ? 1.6 : 1), 8, dt);
+        if (s) s.intensity = damp(s.intensity, s.userData.base * (b.index === this.hovered ? 1.15 : 1), 3, dt);
       }
       this.dispatchEvent(new Event('frame'));
       this.composer.render(dt);

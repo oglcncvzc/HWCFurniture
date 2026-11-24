@@ -16,6 +16,14 @@ export const BAYS = ROWS.flatMap((z) => [
 
 const DOOR = { w: 2.6, h: 3.1 };
 
+/** Yüzeye çok yakın düzlemler için: derinlik çakışmasını (z-fighting) önler. */
+function decal(mat, strength = 1) {
+  mat.polygonOffset = true;
+  mat.polygonOffsetFactor = -2 * strength;
+  mat.polygonOffsetUnits = -4 * strength;
+  return mat;
+}
+
 function std(color, rough = 0.8, metal = 0, extra = {}) {
   return new THREE.MeshStandardMaterial({ color, roughness: rough, metalness: metal, ...extra });
 }
@@ -186,7 +194,7 @@ export function buildShowroom(scene, stations) {
     root.add(d);
   }
   const sign = logoTexture('EL YAPIMI MASİF AHŞAP · ANKARA');
-  const signMat = new THREE.MeshBasicMaterial({ map: sign, transparent: true, color: new THREE.Color(1.6, 1.45, 1.25) });
+  const signMat = decal(new THREE.MeshBasicMaterial({ map: sign, transparent: true, color: new THREE.Color(1.6, 1.45, 1.25) }));
   const signMesh = new THREE.Mesh(new THREE.PlaneGeometry(6, 1.5), signMat);
   signMesh.position.set(0, 5.95, front + wall + 0.012);
   root.add(signMesh);
@@ -195,7 +203,7 @@ export function buildShowroom(scene, stations) {
   const doorWood = getVerticalWood('cevizKoyu', 13);
   const doorMat = new THREE.MeshStandardMaterial({ map: doorWood.map, roughness: 0.55 });
   const brass = std(0xb8925a, 0.3, 1);
-  const doorGlass = new THREE.MeshPhysicalMaterial({ color: 0xdfe8ea, roughness: 0.05, transparent: true, opacity: 0.25 });
+  const doorGlass = decal(new THREE.MeshPhysicalMaterial({ color: 0xdfe8ea, roughness: 0.05, transparent: true, opacity: 0.25 }));
   const leaves = [];
   for (const dir of [1, -1]) {
     const pivot = new THREE.Group();
@@ -235,7 +243,7 @@ export function buildShowroom(scene, stations) {
   ground.rotation.x = -Math.PI / 2;
   ground.position.set(0, -0.005, front + wall + 30);
   root.add(ground);
-  const walk = new THREE.Mesh(new THREE.PlaneGeometry(5, 14), std(0x6b655d, 0.6));
+  const walk = new THREE.Mesh(new THREE.PlaneGeometry(5, 14), decal(std(0x6b655d, 0.6)));
   walk.rotation.x = -Math.PI / 2;
   walk.position.set(0, 0.002, front + wall + 7);
   root.add(walk);
@@ -290,7 +298,7 @@ export function buildShowroom(scene, stations) {
     slats.setColorAt(si, col.setRGB(t, t * 0.97, t * 0.94));
     si++;
   };
-  const backerMat = std(0x1d1814, 0.9);
+  const backerMat = decal(std(0x1d1814, 0.9));
 
   const spots = [];
   const bayRefs = [];
@@ -304,7 +312,7 @@ export function buildShowroom(scene, stations) {
     const wx = bay.side * (halfW - 0.05);
     const backer = new THREE.Mesh(new THREE.PlaneGeometry(4.9, 3.4), backerMat);
     backer.rotation.y = -bay.side * Math.PI / 2;
-    backer.position.set(bay.side * (halfW - 0.005), 1.9, bay.z);
+    backer.position.set(bay.side * (halfW - 0.015), 1.9, bay.z);
     root.add(backer);
     for (let k = 0; k < 52; k++) addSlat(wx, bay.z - 2.4 + k * 0.094, 0);
     // tavan spotu
@@ -322,7 +330,7 @@ export function buildShowroom(scene, stations) {
   // arka duvar: tam genişlik çıtalar + logo plaketi
   for (let x = -halfW + 0.2; x < halfW - 0.2; x += 0.094) addSlat(x, back + 0.05, Math.PI / 2);
   const backBacker = new THREE.Mesh(new THREE.PlaneGeometry(2 * halfW, 3.4), backerMat);
-  backBacker.position.set(0, 1.9, back + 0.005);
+  backBacker.position.set(0, 1.9, back + 0.015);
   root.add(backBacker);
   slats.count = si;
   slats.instanceMatrix.needsUpdate = true;
@@ -365,7 +373,7 @@ export function buildShowroom(scene, stations) {
   });
 
   // giriş paspası + karşılama bankosu
-  const mat = new THREE.Mesh(new THREE.PlaneGeometry(2.4, 1.4), std(0x3b3632, 1));
+  const mat = new THREE.Mesh(new THREE.PlaneGeometry(2.4, 1.4), decal(std(0x3b3632, 1)));
   mat.rotation.x = -Math.PI / 2;
   mat.position.set(0, 0.003, front - 0.9);
   root.add(mat);

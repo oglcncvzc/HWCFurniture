@@ -11,8 +11,10 @@ export const WOODS = {
   meseKoyu: { light: [140, 99, 62], dark: [60, 41, 26], ring: 0.2, figure: 1.0 },
   kestaneSiyah: { light: [62, 56, 51], dark: [19, 18, 17], ring: 0.14, figure: 1.3 },
   igde: { light: [198, 148, 88], dark: [98, 62, 30], ring: 0.18, figure: 2.4 },
+  igdeKoyu: { light: [150, 98, 56], dark: [62, 38, 18], ring: 0.18, figure: 2.4 },
   kayin: { light: [200, 162, 120], dark: [168, 128, 88], ring: 0.25, figure: 0.6 },
   kayinKoyu: { light: [92, 60, 40], dark: [52, 33, 22], ring: 0.25, figure: 0.6 },
+  kayinNatur: { light: [172, 118, 74], dark: [128, 84, 48], ring: 0.25, figure: 0.6 },
 };
 
 export const EPOXY = {
@@ -21,11 +23,11 @@ export const EPOXY = {
   seffaf: { shore: [92, 84, 72], deep: [46, 46, 44], cloud: 0.3, see: 0.5, label: 'Şeffaf' },
   koyuYesil: { shore: [40, 128, 88], deep: [8, 58, 38], cloud: 0.35, pearl: true, label: 'Koyu Yeşil' },
   okyanus: { shore: [96, 196, 214], deep: [10, 70, 140], cloud: 0.3, waves: true, label: 'Okyanus Mavisi' },
-  acikMavi: { shore: [176, 226, 232], deep: [96, 190, 204], cloud: 0.5, pearl: true, label: 'Açık Mavi' },
+  acikMavi: { shore: [132, 210, 218], deep: [56, 156, 176], cloud: 0.45, pearl: true, label: 'Açık Mavi' },
   gokMavi: { shore: [110, 190, 228], deep: [34, 120, 190], cloud: 0.45, pearl: true, label: 'Gök Mavisi' },
   mavi: { shore: [60, 110, 210], deep: [16, 44, 150], cloud: 0.45, pearl: true, label: 'Mavi' },
   yesil: { shore: [44, 150, 104], deep: [10, 84, 56], cloud: 0.45, pearl: true, label: 'Yeşil' },
-  matYesil: { shore: [70, 140, 108], deep: [28, 92, 66], cloud: 0.45, pearl: true, label: 'Mat Yeşil' },
+  matYesil: { shore: [44, 118, 86], deep: [12, 64, 44], cloud: 0.45, pearl: true, label: 'Mat Yeşil' },
 };
 
 // ---------------------------------------------------------------------------
@@ -149,9 +151,9 @@ function generate(spec) {
 
   // Reclaimed: plakalar açık/koyu ceviz arasında değişir
   const reclaimedTones = [
-    { light: [176, 126, 82], dark: [104, 68, 42], ring: 0.18, figure: 1.1 },
-    { light: [120, 80, 50], dark: [52, 33, 20], ring: 0.16, figure: 1.0 },
-    { light: [154, 104, 66], dark: [78, 50, 30], ring: 0.17, figure: 1.2 },
+    { light: [168, 118, 76], dark: [96, 62, 38], ring: 0.18, figure: 1.1 },
+    { light: [132, 88, 56], dark: [64, 40, 24], ring: 0.16, figure: 1.0 },
+    { light: [152, 102, 64], dark: [80, 52, 31], ring: 0.17, figure: 1.2 },
   ];
 
   for (let y = 0; y < H; y++) {
@@ -168,11 +170,11 @@ function generate(spec) {
       } else if (spec.wood === 'mazel') {
         burlWood(n, [222, 186, 132], [150, 104, 56], [74, 40, 14], x, y, out, 1.35);
       } else if (spec.wood === 'cevizKok') {
-        burlWood(n, [132, 86, 52], [48, 30, 18], [30, 18, 10], x, y, out, 0.5);
+        burlWood(n, [118, 76, 46], [48, 29, 16], [28, 16, 8], x, y, out, 0.35);
       } else if (spec.wood === 'meseKok') {
         burlWood(n, [176, 124, 70], [84, 52, 26], [52, 30, 14], x, y, out, 0.6);
       } else if (spec.wood === 'karaagacKok') {
-        burlWood(n, [222, 178, 112], [150, 100, 52], [104, 66, 34], x, y, out, 0.65);
+        burlWood(n, [178, 124, 72], [108, 68, 34], [72, 42, 18], x, y, out, 0.55);
       } else {
         plankWood(n, prof, x, y, H, planks, out);
       }
@@ -203,7 +205,7 @@ function generate(spec) {
           for (let r = 0; r < count; r++) {
             const base = count === 1 ? 0.5 : (r + 1) / (count + 1);
             const c = base + (n2.fbm(u * 2.6 + r * 9, 1.7 + r * 3, 3) - 0.5) * (count === 1 ? 0.42 : 0.2);
-            const hw = (count === 1 ? 0.07 : 0.045) + (count === 1 ? 0.1 : 0.05) * n2.fbm(u * 3.8 + 10 + r * 5, 3.3, 3);
+            const hw = ((count === 1 ? 0.07 : 0.045) + (count === 1 ? 0.1 : 0.05) * n2.fbm(u * 3.8 + 10 + r * 5, 3.3, 3)) * (river.width || 1);
             const d = Math.abs(v - c) / hw;
             if (d < 1) {
               depth = Math.max(depth, 1 - d);
