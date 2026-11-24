@@ -6,6 +6,7 @@ import { cardHTML, renderCollection, initCollection, initCards, COLL_BY, OLD_COL
 import { addToCart, checkoutUrl } from './cart.js';
 import { $, $$, img, esc, priceInfo, discount, variantTitle, WHATSAPP } from './util.js';
 import { renderBlogList, renderArticle, renderHomePosts } from './blog.js';
+import { renderProduct, initProductPage } from './product-page.js';
 import { initSearch, renderSearchPage } from './search.js';
 
 const body = document.body;
@@ -178,132 +179,6 @@ function closeVideo() {
 }
 
 // ---------------------------------------------------------------------------
-// Ürün detay sayfası
-// ---------------------------------------------------------------------------
-const pdp = { handle: null, sel: {}, qty: 1, img: 0 };
-
-function swatch(label) {
-  const key = { 'Transparan Siyah': 'transSiyah', Siyah: 'siyah', Şeffaf: 'seffaf', 'Koyu Yeşil': 'koyuYesil', 'Okyanus Mavisi': 'okyanus' }[label];
-  const e = EPOXY[key];
-  if (!e) return '';
-  const c = (a) => `rgb(${a.join(',')})`;
-  return `background: radial-gradient(circle at 35% 30%, ${c(e.shore)}, ${c(e.deep)} 75%)`;
-}
-
-function renderProduct(handle) {
-  const p = PRODUCTS[handle];
-  if (!p) {
-    $('#pdp').innerHTML = `<div class="notfound"><h1>Ürün bulunamadı</h1><p>Aradığınız ürün kaldırılmış olabilir.</p><a class="btn btn-dark" href="/collections/tum-masalar">Tüm ürünler</a></div>`;
-    return 'Ürün bulunamadı';
-  }
-  if (pdp.handle !== handle) {
-    pdp.handle = handle;
-    pdp.sel = defaultSelection(p);
-    pdp.qty = 1;
-    pdp.img = 0;
-  }
-  const v = findVariant(p, pdp.sel);
-  const d = discount(v[4], v[5]);
-  const has3d = !!STATION_OF[handle];
-  const collSlug = TYPE_TO_COLLECTION[p.type] || 'tum-masalar';
-  const collTitle = COLL_BY[collSlug]?.title || 'Tüm Masalar';
-  const optText = p.options.map((o) => pdp.sel[o.name]).join(' / ');
-  const wa = `${WHATSAPP}?text=${encodeURIComponent(`Merhaba, "${p.title}" (${optText}) hakkında bilgi almak istiyorum.`)}`;
-  const related = (COLL_BY[collSlug]?.products || []).filter((h) => h !== handle).slice(0, 4).map((h) => PRODUCTS[h]);
-
-  $('#pdp').innerHTML = `
-    <nav class="crumbs" aria-label="Sayfa yolu"><a href="/">Ana sayfa</a><span>/</span><a href="/collections/${collSlug}">${collTitle}</a><span>/</span><span>${esc(p.title)}</span></nav>
-    <div class="pdp-grid">
-      <div class="pdp-gallery">
-        <button class="pdp-main" data-zoom aria-label="Fotoğrafı büyüt">
-          <img src="${img(p.images[pdp.img], 1200)}" alt="${esc(p.title)}" />
-          <span class="zoom-hint">Büyütmek için tıklayın</span>
-        </button>
-        <div class="pdp-thumbs">${p.images
-          .map((u, k) => `<button class="${k === pdp.img ? 'on' : ''}" data-thumb="${k}" aria-label="Fotoğraf ${k + 1}"><img src="${img(u, 200)}" alt="" /></button>`)
-          .join('')}</div>
-      </div>
-      <div class="pdp-info">
-        <p class="kicker">${esc(p.type)}</p>
-        <h1>${esc(p.title)}</h1>
-        <a class="pdp-rating" href="/#yorumlar"><span>★★★★★</span> 101 değerlendirme</a>
-        <div class="price-row">
-          <strong>${formatTRY(v[4])}</strong>
-          ${d ? `<s>${formatTRY(v[5])}</s><span class="badge sale">%${d} indirim</span>` : ''}
-        </div>
-        <p class="tax">Vergiler dahil. Türkiye geneli kargo ücretsiz.</p>
-        <p class="ship ${v[6] ? '' : 'out'}">${v[6] ? shipTime(p) : 'Bu seçenek şu an stokta yok'}</p>
-        ${p.options
-          .map((o) => {
-            const isColor = o.name === 'Epoksi Rengi';
-            return `<div class="opt">
-              <div class="opt-label">${esc(o.name)} <span>${esc(pdp.sel[o.name])}</span></div>
-              <div class="chips ${isColor ? 'colors' : ''}">${o.values
-                .map((val) =>
-                  isColor
-                    ? `<button class="color ${val === pdp.sel[o.name] ? 'on' : ''}" data-popt="${esc(o.name)}" data-val="${esc(val)}" title="${esc(val)}" style="${swatch(val)}"><span class="sr">${esc(val)}</span></button>`
-                    : `<button class="chip ${val === pdp.sel[o.name] ? 'on' : ''}" ${o.values.length === 1 ? 'disabled' : ''} data-popt="${esc(o.name)}" data-val="${esc(val)}">${esc(val)}</button>`
-                )
-                .join('')}</div>
-            </div>`;
-          })
-          .join('')}
-        <div class="buy-row">
-          <div class="qty big"><button data-pq="-1" aria-label="Azalt">−</button><span>${pdp.qty}</span><button data-pq="1" aria-label="Artır">+</button></div>
-          <button class="btn btn-dark btn-lg" data-add ${v[6] ? '' : 'disabled'}>${v[6] ? 'Sepete ekle' : 'Tükendi'}</button>
-        </div>
-        ${v[6] ? `<a class="btn btn-outline btn-lg wide" href="${checkoutUrl([{ id: v[0], qty: pdp.qty }])}">Hemen satın al</a>` : ''}
-        ${has3d ? `<button class="btn btn-ghost-dark btn-lg wide" data-open3d="${handle}"><span class="cube"></span>3D showroom'da incele</button>` : ''}
-        <ul class="trust">
-          <li>Ankara atölyemizde siparişinize özel üretilir</li>
-          <li>Türkiye geneline ücretsiz, sigortalı kargo</li>
-          <li>Standart ölçülerde 14 gün içinde iade</li>
-          <li>Kredi kartı, banka kartı ve havale/EFT ile güvenli ödeme</li>
-        </ul>
-        <a class="wa-line" href="${wa}" target="_blank" rel="noopener">Sorunuz mu var? WhatsApp'tan yazın →</a>
-        <div class="pdp-acc">
-          <details open><summary>Ürün açıklaması</summary><p>${esc(p.desc)}</p></details>
-          <details><summary>Ölçü ve seçenekler</summary><p>${p.options.map((o) => `<b>${esc(o.name)}:</b> ${o.values.map(esc).join(', ')}`).join('<br />')}<br /><b>Yükseklik:</b> ${/Sehpa/.test(p.type) ? (p.type === 'Orta Sehpa' ? '45 cm' : '53 cm') : p.tags.includes('linak') ? 'elektrikli, ayarlanabilir' : '76 cm'}<br />Listede olmayan ölçüler için <a href="/pages/ozel-uretim-siparisleri">özel üretim</a> talep edebilirsiniz.</p></details>
-          <details><summary>Yüzey ve bakım</summary><p>Masif ahşap yüzeylerde Rubio Monocoat Oil Plus 2C kullanıyoruz; ahşabın dokusunu korur, lekelenmeye karşı direnç sağlar ve noktasal yenilenebilir. Yüzeyi nemli yumuşak bir bezle silip kurulayın; doğrudan sıcak tencere koymayın, uzun süreli güneş ve aşırı nemden kaçının.</p></details>
-          <details><summary>Teslimat ve iade</summary><p>Masif ahşap ürünler 3–4, epoksi ürünler 4–6 haftada hazırlanır; hemen teslim ürünler stoktan gönderilir. Tabla ve ayaklar ayrı, koruyucu ambalajla gelir; kurulum basittir. Standart ölçülerde teslimden itibaren 14 gün içinde iade veya değişim yapılabilir; kişiye özel ölçüler kusur olmadıkça iade kapsamı dışındadır. <a href="https://hwcfurniture.com/pages/iade-ve-degisim" target="_blank" rel="noopener">İade ve Değişim</a></p></details>
-        </div>
-      </div>
-    </div>
-    ${related.length ? `<section class="related"><h2>Bunlar da ilginizi çekebilir</h2><div class="pgrid four">${related.map(cardHTML).join('')}</div></section>` : ''}
-  `;
-  document.title = `${p.title} | HWC`;
-  return p.title;
-}
-
-function initProductEvents() {
-  $('#pdp').addEventListener('click', (e) => {
-    const p = PRODUCTS[pdp.handle];
-    if (!p) return;
-    const t = e.target.closest('[data-thumb]');
-    if (t) {
-      pdp.img = +t.dataset.thumb;
-      $('#pdp .pdp-main img').src = img(p.images[pdp.img], 1200);
-      $$('#pdp [data-thumb]').forEach((b) => b.classList.toggle('on', b === t));
-      return;
-    }
-    if (e.target.closest('[data-zoom]')) return deps.openLightbox?.(p, pdp.img);
-    const o = e.target.closest('[data-popt]');
-    if (o && !o.disabled) {
-      pdp.sel[o.dataset.popt] = o.dataset.val;
-      renderProduct(pdp.handle);
-      return;
-    }
-    const q = e.target.closest('[data-pq]');
-    if (q) {
-      pdp.qty = Math.max(1, Math.min(20, pdp.qty + +q.dataset.pq));
-      renderProduct(pdp.handle);
-      return;
-    }
-    if (e.target.closest('[data-add]')) addToCart(p.handle, findVariant(p, pdp.sel), pdp.qty);
-  });
-}
-
-// ---------------------------------------------------------------------------
 // Yönlendirme
 // ---------------------------------------------------------------------------
 const TITLE_HOME = 'Masif Ahşap ve Epoksi Masa Modelleri | HWC';
@@ -362,6 +237,11 @@ export function route({ keepScroll = false } = {}) {
   else if (r.page === 'blog') renderBlogList();
   else if (r.page === 'yazi') renderArticle(r.arg);
   else if (r.page === 'arama') renderSearchPage();
+  else if (r.page === 'ozel-uretim') {
+    const urun = new URLSearchParams(location.search).get('urun');
+    const f = document.getElementById('quoteForm');
+    if (urun && f) f.elements.not.value = `İlgilendiğim model: ${urun}`;
+  }
   if (r.title) document.title = r.title;
   $('#pageCrumb').innerHTML = crumb ? `<a href="/">Ana sayfa</a><span>/</span><span>${esc(crumb)}</span>` : '';
   $$('.nav a, .drop a').forEach((a) => a.classList.toggle('current', a.getAttribute('href') === location.pathname));
@@ -395,7 +275,7 @@ export function initShop(d) {
   initSearch(navigate);
   initCollection();
   initCards(navigate);
-  initProductEvents();
+  initProductPage(deps);
   $('#videoModal').addEventListener('click', (e) => {
     if (e.target.closest('[data-vclose]') || e.target.id === 'videoModal') closeVideo();
   });

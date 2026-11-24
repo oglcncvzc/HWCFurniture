@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "sync:products": "node scripts/sync-products.mjs",
     "sync:blog": "node scripts/sync-blog.mjs",
-    "sync:collections": "node scripts/sync-collections.mjs"
+    "sync:collections": "node scripts/sync-collections.mjs",
+    "sync:product-pages": "node scripts/sync-product-pages.mjs"
   },
   "dependencies": {
     "three": "0.187.0"
