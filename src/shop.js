@@ -4,6 +4,8 @@ import { EPOXY } from './three/textures.js';
 import { SLIDES, INSTAGRAM, INSTAGRAM_URL, COLLECTION_PAGES, TYPE_TO_COLLECTION } from './site-data.js';
 import { addToCart, checkoutUrl } from './cart.js';
 import { $, $$, img, esc, priceInfo, discount, variantTitle, WHATSAPP } from './util.js';
+import { renderBlogList, renderArticle, renderHomePosts } from './blog.js';
+import { initSearch, renderSearchPage } from './search.js';
 
 const body = document.body;
 let deps = {};
@@ -371,13 +373,17 @@ const PAGES = {
   'olcu-rehberi': { page: 'olcu-rehberi', title: 'Oturma ve Masa Boyutu Rehberi | HWC', crumb: 'Oturma ve Masa Boyutu Rehberi' },
   sss: { page: 'sss', title: 'Sıkça Sorulan Sorular | HWC', crumb: 'Sıkça Sorulan Sorular' },
   iletisim: { page: 'iletisim', title: 'İletişim | HWC', crumb: 'İletişim' },
+  blog: { page: 'blog' },
+  arama: { page: 'arama' },
 };
 let currentArg = '';
 
 function parse() {
   const parts = location.pathname.replace(/^\/+|\/+$/g, '').split('/');
   const def = PAGES[parts[0]] || { page: 'notfound', title: 'Sayfa bulunamadı | HWC', crumb: 'Sayfa bulunamadı' };
-  return { ...def, arg: decodeURIComponent(parts[1] || '') };
+  const arg = decodeURIComponent(parts[1] || '');
+  if (def.page === 'blog' && arg) return { page: 'yazi', arg };
+  return { ...def, arg };
 }
 
 export function route({ keepScroll = false } = {}) {
@@ -391,6 +397,9 @@ export function route({ keepScroll = false } = {}) {
   let crumb = r.crumb;
   if (r.page === 'koleksiyon') crumb = renderCollection(r.arg || 'tum-masalar');
   else if (r.page === 'urun') renderProduct(r.arg);
+  else if (r.page === 'blog') renderBlogList();
+  else if (r.page === 'yazi') renderArticle(r.arg);
+  else if (r.page === 'arama') renderSearchPage();
   if (r.title) document.title = r.title;
   $('#pageCrumb').innerHTML = crumb ? `<a href="/">Ana sayfa</a><span>/</span><span>${esc(crumb)}</span>` : '';
   $$('.nav a, .drop a').forEach((a) => a.classList.toggle('current', a.getAttribute('href') === location.pathname));
@@ -405,7 +414,7 @@ export function route({ keepScroll = false } = {}) {
 }
 
 export function navigate(url, opts) {
-  if (url === location.pathname + location.hash) return route(opts);
+  if (url === location.pathname + location.search + location.hash) return route(opts);
   history.pushState(null, '', url);
   route(opts);
 }
@@ -420,6 +429,8 @@ export function initShop(d) {
   deps = d;
   initHero();
   initHome();
+  renderHomePosts();
+  initSearch(navigate);
   initCollectionControls();
   initProductEvents();
   $('#videoModal').addEventListener('click', (e) => {
