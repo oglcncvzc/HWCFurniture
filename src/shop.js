@@ -148,20 +148,25 @@ function initHome() {
   $('#igRow').innerHTML = INSTAGRAM.map(
     (it, k) => `<button class="ig-tile ${it.video ? 'has-video' : ''}" data-ig="${k}" aria-label="${esc(it.caption)}">
       <img src="${it.img}" alt="" loading="lazy" />
-      ${it.video ? `<video muted playsinline loop preload="none" src="${it.video}"></video><span class="ig-play" aria-hidden="true"></span>` : ''}
+      ${it.video ? `<video muted autoplay playsinline loop preload="metadata" poster="${it.img}" src="${it.video}"></video><span class="ig-play" aria-hidden="true"></span>` : ''}
       <span class="ig-cap">${esc(it.caption)}</span>
     </button>`
   ).join('');
-  // Videolu kareler görünürken sessiz oynasın
+  // Videolu kareler ekrandayken sessiz ve döngüde oynar (orijinal sitedeki gibi)
+  $$('#igRow video').forEach((v) => {
+    v.muted = true;
+    v.addEventListener('playing', () => (v.dataset.on = '1'));
+  });
   const io = 'IntersectionObserver' in window
     ? new IntersectionObserver((ents) => ents.forEach((en) => {
         const v = en.target.querySelector('video');
         if (!v) return;
         if (en.isIntersecting) v.play().catch(() => {});
         else v.pause();
-      }), { threshold: 0.6 })
+      }), { threshold: 0.25 })
     : null;
   if (io) $$('#igRow .ig-tile.has-video').forEach((t) => io.observe(t));
+  else $$('#igRow video').forEach((v) => v.play().catch(() => {}));
   $('#igRow').addEventListener('click', (e) => {
     const t = e.target.closest('[data-ig]');
     if (!t) return;
