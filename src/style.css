@@ -345,7 +345,7 @@ body.lb-open { overflow: hidden; }
   .lb-thumbs button { width: 52px; height: 52px; }
 }
 
-body.no-3d #scene, body.no-3d [data-action='enter'] { display: none; }
+body.no-3d #scene, body.no-3d [data-action='enter'], body.no-3d .card-3d, body.no-3d .band { display: none; }
 body.no-3d .hero { background: #1d1a17; }
 
 /* ------------------------------------------------------------------ mobil */

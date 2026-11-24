@@ -75,7 +75,8 @@ function burlWood(n, light, dark, eyeCol, x, y, out, eyes = 0.7) {
   const s = swirl * swirl;
   const cluster = smooth(0.48, 0.68, n.fbm(x * 0.0045 + 80, y * 0.0045 + 20, 3));
   const e = n.noise(x * 0.17 + 9, y * 0.17 + 4);
-  const eye = smooth(0.74, 0.9, e) * (0.25 + cluster) * eyes;
+  const e2 = n.noise(x * 0.07 + 3, y * 0.07 + 11);
+  const eye = Math.min(1, (smooth(0.72, 0.88, e) + smooth(0.8, 0.92, e2) * 0.7) * (0.2 + cluster) * eyes);
   const k = clamp01(s * 0.5 + (w - 0.45) * 1.0 + cluster * 0.3);
   mixColor(out, light, dark, k);
   if (eye > 0) {
@@ -165,7 +166,7 @@ function generate(spec) {
         const pick = reclaimedTones[Math.floor(n2.noise(pi * 3.3 + 0.5, 1.5) * 3) % 3];
         plankWood(n, pick, x, y, H, pcount, out, 0.12);
       } else if (spec.wood === 'mazel') {
-        burlWood(n, [214, 166, 100], [122, 78, 36], [62, 36, 16], x, y, out, 0.9);
+        burlWood(n, [222, 186, 132], [150, 104, 56], [74, 40, 14], x, y, out, 1.35);
       } else if (spec.wood === 'cevizKok') {
         burlWood(n, [132, 86, 52], [48, 30, 18], [30, 18, 10], x, y, out, 0.5);
       } else if (spec.wood === 'meseKok') {

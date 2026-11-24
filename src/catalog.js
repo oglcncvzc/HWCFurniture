@@ -99,11 +99,11 @@ const VISUALS = {
   'dogal-kenar-siyah-kestane-ahsap-kutuk-mutfak-masasi': () => ({ model: 'live', seed: 23, legs: 'metalU', finish: 'matte', surface: { wood: 'kestaneSiyah', seed: 23 } }),
   'modern-masif-mese-ahsap-masa': () => ({ model: 'rect', legs: 'metalU', surface: { wood: 'mese', planks: 5, seed: 31 } }),
   'industrial-modern-ahsap-yemek-masasi-masif-mese-metal-ayakli': () => ({ model: 'rect', legs: 'metalU', finish: 'matte', surface: { wood: 'meseKoyu', planks: 5, seed: 32 } }),
-  'yuvarlak-ceviz-ahsap-yemek-masasi': () => ({ model: 'round', legs: 'tripodWood', legWood: 'ceviz', surface: { wood: 'ceviz', planks: 3, seed: 41, size: [768, 768] } }),
+  'yuvarlak-ceviz-ahsap-yemek-masasi': () => ({ model: 'round', legs: 'bladeWood', legWood: 'ceviz', surface: { wood: 'ceviz', planks: 3, seed: 41, size: [768, 768] } }),
   'yuvarlak-mese-yemek-masasi': () => ({ model: 'round', legs: 'tripodCurved', legWood: 'kayin', surface: { wood: 'mese', planks: 3, seed: 42, size: [768, 768] } }),
   'yuvarlak-epoksi-masa-mazel-agaci-siyah-nehir-epoksi': () => ({
     model: 'round',
-    legs: 'tripodMetal',
+    legs: 'bladeBlack',
     finish: 'gloss',
     surface: { wood: 'mazel', seed: 43, size: [768, 768], islands: { color: 'siyah', wood: 0.5, scale: 0.0048 } },
   }),

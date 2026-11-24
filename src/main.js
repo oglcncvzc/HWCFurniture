@@ -145,7 +145,45 @@ function bayConfig(i) {
   return { visual, dims };
 }
 
-const engine = new ShowroomEngine($('#scene'));
+function hasWebGL2() {
+  try {
+    return !!document.createElement('canvas').getContext('webgl2');
+  } catch {
+    return false;
+  }
+}
+
+/** WebGL2 olmayan tarayıcılarda site normal çalışsın diye boş motor. */
+class NoEngine extends EventTarget {
+  state = 'none';
+  walk = { z: 0, yaw: 0 };
+  bays = [];
+  inspecting = -1;
+  scrollProgress = 0;
+  paused = true;
+  async build() {
+    throw new Error('WebGL2 desteklenmiyor');
+  }
+  enter() {}
+  exit() {}
+  inspect() {}
+  uninspect() {}
+  goToBay() {}
+  setBay() {}
+  shiftView() {}
+  project() {
+    return { visible: false, dist: 99, x: 0, y: 0 };
+  }
+}
+
+let engine;
+try {
+  if (!hasWebGL2()) throw new Error('webgl2');
+  engine = new ShowroomEngine($('#scene'));
+} catch (err) {
+  console.warn('3D devre dışı:', err);
+  engine = new NoEngine();
+}
 if (import.meta.env.DEV) window.__hwc = { engine, bayState, open: (h) => openInShowroom(h) };
 const loaderBar = $('#loaderBar');
 
@@ -550,6 +588,8 @@ addEventListener(
     engine.scrollProgress = s;
     topbar.classList.toggle('solid', scrollY > innerHeight * 0.75);
     $('#scene').style.opacity = body.classList.contains('immersive') ? 1 : String(1 - s * 0.6);
+    // hero'nun altına inildiğinde sahne görünmez: çizimi durdur
+    engine.paused = !body.classList.contains('immersive') && scrollY > innerHeight * 1.15;
   },
   { passive: true }
 );

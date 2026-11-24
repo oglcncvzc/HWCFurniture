@@ -78,6 +78,9 @@ export class ShowroomEngine extends EventTarget {
     this.viewShift = { x: 0, y: 0 };
     this.scrollProgress = 0;
     this.bays = [];
+    this.paused = false;
+    this.perf = { frames: 0, time: 0, level: 0 };
+    this.lowEnd = this.isTouch && (navigator.hardwareConcurrency || 4) <= 4;
     this.clock = new THREE.Clock();
     this._tmp = new THREE.Vector3();
 
@@ -120,7 +123,9 @@ export class ShowroomEngine extends EventTarget {
           metal,
           resin: new THREE.MeshPhysicalMaterial({
             color: 0xffffff,
-            transmission: 1,
+            transmission: this.lowEnd ? 0 : 1,
+            transparent: this.lowEnd,
+            opacity: this.lowEnd ? 0.35 : 1,
             thickness: 0.05,
             roughness: 0.04,
             ior: 1.5,
@@ -492,6 +497,29 @@ export class ShowroomEngine extends EventTarget {
     }
   }
 
+  /** Kare süresi yüksekse çözünürlüğü, sonra bloom'u düşürür. */
+  _adapt(dt) {
+    const p = this.perf;
+    if (p.level >= 3 || dt > 0.5) return;
+    p.frames++;
+    p.time += dt;
+    if (p.frames < 90) return;
+    const avg = p.time / p.frames;
+    p.frames = 0;
+    p.time = 0;
+    if (avg < 1 / 42) return;
+    p.level++;
+    const pr = this.renderer.getPixelRatio();
+    if (p.level === 1 && pr > 1.25) this.renderer.setPixelRatio(Math.max(1, pr - 0.5));
+    else if (p.level <= 2) {
+      this.renderer.setPixelRatio(1);
+      this.bloom.enabled = false;
+    } else {
+      this.renderer.setPixelRatio(0.75);
+    }
+    this.resize();
+  }
+
   /** Etiket konumları için ekran koordinatı. */
   project(i) {
     const b = this.bays[i];
@@ -504,8 +532,12 @@ export class ShowroomEngine extends EventTarget {
   _loop() {
     const tick = () => {
       requestAnimationFrame(tick);
-      const dt = Math.min(this.clock.getDelta(), 0.05);
+      const rawDt = this.clock.getDelta();
+      const dt = Math.min(rawDt, 0.05);
       const now = performance.now();
+      const busy = this.tweens.size > 0 || this.state !== 'landing';
+      if ((this.paused || document.hidden) && !busy) return;
+      this._adapt(rawDt);
       for (const tw of this.tweens) {
         const p = Math.min(1, (now - tw.t0) / tw.duration);
         tw.fn(tw.ease(p), p);

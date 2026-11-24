@@ -125,8 +125,20 @@ function makeTop(kind, L, W, t, opts = {}) {
     case 'chamfer':
       return extrudeTop(roundedRectShape(L, W, 0.004), L, W, t, 0.012);
     case 'round': {
-      const g = new THREE.CylinderGeometry(L / 2, L / 2, t, 96, 1);
-      g.translate(0, t / 2, 0);
+      // yuvarlatılmış kenarlı yuvarlak tabla (lathe profili)
+      const R = L / 2;
+      const rr = Math.min(0.014, t * 0.38);
+      const pts = [new THREE.Vector2(0, 0)];
+      const arc = (cx, cy, a0, a1) => {
+        for (let k = 0; k <= 6; k++) {
+          const a = a0 + ((a1 - a0) * k) / 6;
+          pts.push(new THREE.Vector2(cx + Math.cos(a) * rr, cy + Math.sin(a) * rr));
+        }
+      };
+      arc(R - rr, rr, -Math.PI / 2, 0);
+      arc(R - rr, t - rr, 0, Math.PI / 2);
+      pts.push(new THREE.Vector2(0, t));
+      const g = new THREE.LatheGeometry(pts, 96);
       return planarUV(g, L, W);
     }
     case 'roundSoft': {
@@ -222,6 +234,35 @@ function legsCurved3(g, D, h, wood, metal) {
   }
   const hub = mesh(new THREE.CylinderGeometry(0.075, 0.075, 0.11, 32), metal);
   hub.position.y = hubY + 0.03;
+  g.add(hub);
+}
+
+// Yassı "bıçak" profilli 3 ayak: siyah göbekten yere iner, tablaya Y kolu uzanır
+function legsBlade(g, D, h, mat, hubMat) {
+  const R = D / 2;
+  const hubY = h - 0.15;
+  const footR = R * 0.8;
+  const s = new THREE.Shape();
+  s.moveTo(footR + 0.012, 0);
+  s.lineTo(footR - 0.034, 0);
+  s.quadraticCurveTo(R * 0.36, hubY * 0.42, 0.06, hubY - 0.075);
+  s.lineTo(0.06, hubY + 0.05);
+  s.quadraticCurveTo(0.1, h - 0.015, R * 0.3, h);
+  s.lineTo(R * 0.5, h);
+  s.quadraticCurveTo(0.22, hubY + 0.03, 0.2, hubY - 0.05);
+  s.quadraticCurveTo(R * 0.52, hubY * 0.5, footR + 0.012, 0);
+  const depth = 0.036;
+  const geo = new THREE.ExtrudeGeometry(s, { depth, bevelEnabled: true, bevelThickness: 0.004, bevelSize: 0.004, bevelSegments: 2, curveSegments: 18 });
+  geo.translate(0, 0, -depth / 2);
+  const uvGeo = planarUV(geo, 0.6, 0.3);
+  for (let i = 0; i < 3; i++) {
+    const ang = (i / 3) * Math.PI * 2 + Math.PI / 6;
+    const m = mesh(uvGeo, mat);
+    m.rotation.y = -ang;
+    g.add(m);
+  }
+  const hub = mesh(new THREE.CylinderGeometry(0.075, 0.075, 0.13, 32), hubMat);
+  hub.position.y = hubY - 0.01;
   g.add(hub);
 }
 
@@ -354,12 +395,12 @@ export function buildTable(visual, dims, mats) {
   };
 
   if (model === 'round') {
-    const t = 0.04;
+    const t = 0.045;
     topY = H;
     addTop('round', t, H - t);
     if (visual.legs === 'metalCross') legsMetalCross(g, L, H - t, mats.leg);
-    else if (visual.legs === 'tripodMetal') legsTripod(g, L, H - t, mats.leg, mats.metal, false);
-    else if (visual.legs === 'tripodWood') legsTripod(g, L, H - t, mats.legWood, mats.metal, false);
+    else if (visual.legs === 'tripodMetal' || visual.legs === 'bladeBlack') legsBlade(g, L, H - t, mats.leg, mats.metal);
+    else if (visual.legs === 'tripodWood' || visual.legs === 'bladeWood') legsBlade(g, L, H - t, mats.legWood, mats.metal);
     else if (visual.legs === 'tripodCurved') legsTripod(g, L, H - t, mats.legWood, mats.metal, true);
     else legsCurved3(g, L, H - t, mats.legWood, mats.metal);
   } else if (model === 'side' || model === 'sidePair') {
