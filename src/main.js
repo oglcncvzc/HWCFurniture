@@ -32,7 +32,13 @@ document.addEventListener('click', (e) => {
 });
 $('#menuBtn').addEventListener('click', () => body.classList.toggle('menu-open'));
 document.querySelectorAll('.nav a[href^="#"]').forEach((a) => a.addEventListener('click', () => body.classList.remove('menu-open')));
-document.querySelector('.nav-drop button').addEventListener('click', (e) => e.currentTarget.parentElement.classList.toggle('open'));
+document.querySelectorAll('.nav-drop > button').forEach((b) =>
+  b.addEventListener('click', (e) => {
+    const d = e.currentTarget.parentElement;
+    document.querySelectorAll('.nav-drop').forEach((x) => x !== d && x.classList.remove('open'));
+    d.classList.toggle('open');
+  })
+);
 
 // Teklif formu → WhatsApp veya e-posta (backend gerektirmez)
 const quoteForm = $('#quoteForm');
@@ -347,7 +353,7 @@ function renderPanel(i) {
     <div class="panel-foot">
       <button class="btn btn-dark ${v[6] ? '' : 'disabled'}" data-panel-add ${v[6] ? '' : 'disabled'}>Sepete ekle · ${formatTRY(v[4])}</button>
       <div class="foot-row">
-        <a class="btn btn-outline" href="/urun/${p.handle}" data-leave3d>Ürün sayfası</a>
+        <a class="btn btn-outline" href="/products/${p.handle}" data-leave3d>Ürün sayfası</a>
         <a class="btn btn-outline" href="${wa}" target="_blank" rel="noopener">WhatsApp'tan sor</a>
       </div>
       <div class="panel-nav">

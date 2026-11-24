@@ -10,6 +10,9 @@
     />
     <meta name="theme-color" content="#141210" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant:wght@500;600&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/src/style.css" />
   </head>
   <body>
@@ -30,21 +33,35 @@
     <header class="topbar" id="topbar">
       <a class="logo" href="/" aria-label="hwcfurniture ana sayfa"><img src="/hwc-logo.png" alt="hwcfurniture" /></a>
       <nav class="nav" aria-label="Ana menü">
-        <a href="/koleksiyon/calisma-masalari">Çalışma Masaları</a>
-        <a href="/koleksiyon/yemek-masalari">Yemek Masaları</a>
-        <a href="/koleksiyon/epoksi-masalar">Epoksi Masalar</a>
-        <a href="/koleksiyon/sehpalar">Sehpalar</a>
-        <a href="/koleksiyon/hemen-teslim">Hemen Teslim</a>
         <div class="nav-drop">
-          <button type="button" aria-haspopup="true">Atölye</button>
+          <button type="button" aria-haspopup="true">Çalışma Masaları <svg viewBox="0 0 12 12" width="10" height="10" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><path d="m2.5 4.5 3.5 3.5 3.5-3.5"/></svg></button>
           <div class="drop">
-            <a href="/hakkimizda">Hikayemiz</a>
-            <a href="/#atolye">Nasıl üretiyoruz</a>
-            <a href="/ozel-uretim">Özel Ölçü Üretimi</a>
-            <a href="/olcu-rehberi">Masa Boyutu Rehberi</a>
-            <a href="/blog">Blog / Rehber</a>
-            <a href="/sss">Sıkça Sorulan Sorular</a>
-            <a href="/iletisim">İletişim</a>
+            <a href="/collections/ofis-ve-calisma-masalari">Tüm çalışma masaları</a>
+            <a href="/collections/yukseklik-ayarli-masalar">Yükseklik ayarlı masa</a>
+            <a href="/collections/toplanti-masasi">Toplantı masaları</a>
+            <a href="/collections/hemen-teslim-urunler">Hemen teslim</a>
+          </div>
+        </div>
+        <div class="nav-drop">
+          <button type="button" aria-haspopup="true">Yemek Masaları <svg viewBox="0 0 12 12" width="10" height="10" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><path d="m2.5 4.5 3.5 3.5 3.5-3.5"/></svg></button>
+          <div class="drop">
+            <a href="/collections/yemek-mutfak-masalari">Tüm yemek masaları</a>
+            <a href="/collections/yuvarlak-ahsap-masa">Yuvarlak masalar</a>
+            <a href="/collections/kutuk-masalar">Doğal kenarlı ve kütük masalar</a>
+            <a href="/collections/epoksi-masa-modelleri">Epoksi yemek masaları</a>
+          </div>
+        </div>
+        <a href="/collections/epoksi-masa-modelleri">Epoksi Masalar</a>
+        <a href="/collections/sehpa-modelleri">Sehpalar</a>
+        <div class="nav-drop">
+          <button type="button" aria-haspopup="true">Atölye <svg viewBox="0 0 12 12" width="10" height="10" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><path d="m2.5 4.5 3.5 3.5 3.5-3.5"/></svg></button>
+          <div class="drop">
+            <a href="/pages/about">Hikayemiz</a>
+            <a href="/pages/ozel-uretim-siparisleri">Özel Ölçü Üretimi</a>
+            <a href="/pages/oturma-ve-masa-boyutu-rehberi">Masa Boyutu Rehberi</a>
+            <a href="/blogs/rehber">Blog / Rehber</a>
+            <a href="/pages/faq">Sıkça Sorulan Sorular</a>
+            <a href="/pages/contact">İletişim</a>
           </div>
         </div>
       </nav>
@@ -77,7 +94,7 @@
               </p>
               <div class="cta-row">
                 <button class="btn btn-light btn-lg" data-action="enter">Showroom'u Gez <span class="arrow">→</span></button>
-                <a class="btn btn-outline-light btn-lg" href="/koleksiyon/tum-masalar">Koleksiyonu incele</a>
+                <a class="btn btn-outline-light btn-lg" href="/collections/tum-masalar">Koleksiyonu incele</a>
               </div>
             </div>
             <div class="hero-meta">
@@ -107,26 +124,26 @@
         <section class="section blog-list" id="blogList" data-page="blog"></section>
         <section class="section article" id="article" data-page="yazi"></section>
         <section class="section search-page" id="searchPage" data-page="arama"></section>
-        <section data-page="home urun" class="usp" id="avantajlar">
-          <div class="usp-item">
-            <p class="kicker">Atölye</p>
-            <h3>Ankara'da El Yapımı</h3>
-            <p>Her ürün, siparişiniz üzerine atölyemizde üretilir.</p>
-          </div>
-          <div class="usp-item">
-            <p class="kicker">Malzeme</p>
-            <h3>Tamamen Masif Ahşap</h3>
-            <p>Gerçek ağaçtan üretilir, her ürün tektir.</p>
-          </div>
-          <div class="usp-item">
-            <p class="kicker">Teslimat</p>
-            <h3>Ücretsiz Kargo</h3>
-            <p>Türkiye'nin her yerine kargo ücretsizdir.</p>
-          </div>
-          <div class="usp-item">
-            <p class="kicker">Ölçü</p>
-            <h3>İstediğiniz Ölçüde</h3>
-            <p>Alanınıza uygun ölçüde de üretiyoruz. <a class="text-link" href="/ozel-uretim">Teklif alın</a></p>
+        <section data-page="home urun" class="hwc-trust hwc-trust--serif hwc-trust--animate" id="avantajlar">
+          <div class="hwc-trust__inner">
+            <ul class="hwc-trust__grid" role="list">
+            <li class="hwc-trust__item" style="--i: 0;">
+              <span class="hwc-trust__icon" aria-hidden="true"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"><path d="M5 35h38"></path><path d="M7 35v-4h34v4"></path><path d="M10 31l3-7h21l3 7"></path><path d="M28 24c-.5-6 2.5-10 7.5-10 3 0 4.5 2.2 4.5 5.5V31"></path><path d="M33 19.5c1-1.4 2.6-1.6 3.8-.6"></path><circle cx="15" cy="19" r="3"></circle><path d="M15 22v2"></path><path d="M20.5 24l-2.5-11h4.5l2.5 11"></path></svg></span>
+              <span class="hwc-trust__text"><span class="hwc-trust__label">ATÖLYE</span><span class="hwc-trust__title">Ankara'da El Yapımı</span><span class="hwc-trust__body">Her ürün, siparişiniz üzerine atölyemizde üretilir.</span></span>
+            </li>
+            <li class="hwc-trust__item" style="--i: 1;">
+              <span class="hwc-trust__icon" aria-hidden="true"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"><path d="M24 6.5c9.8 0 17.5 7.6 17.5 17.3 0 9.9-7.8 17.7-17.6 17.7C14.2 41.5 6.5 33.6 6.5 24 6.5 14.3 14.3 6.5 24 6.5z"></path><path d="M24.3 12c6.6 0 11.7 5.3 11.7 11.8 0 6.6-5.1 11.7-11.9 11.7-6.5 0-11.6-5.2-11.6-11.6 0-6.6 5.2-11.9 11.8-11.9z"></path><path d="M24.2 17.5c3.5 0 6.2 2.8 6.2 6.3 0 3.6-2.8 6.2-6.3 6.2-3.4 0-6.1-2.7-6.1-6.2 0-3.5 2.7-6.3 6.2-6.3z"></path><circle cx="24.2" cy="23.9" r="1.4"></circle><path d="M24 6.5l-1.6 7.5"></path></svg></span>
+              <span class="hwc-trust__text"><span class="hwc-trust__label">MALZEME</span><span class="hwc-trust__title">Tamamen Masif Ahşap</span><span class="hwc-trust__body">Gerçek ağaçtan üretilir, her ürün tektir.</span></span>
+            </li>
+            <li class="hwc-trust__item" style="--i: 2;">
+              <span class="hwc-trust__icon" aria-hidden="true"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"><path d="M3 22h32l10-7H13z"></path><path d="M3 22v11h32V22"></path><path d="M35 33l10-7V15"></path><path d="M10 26.5h18"></path><path d="M12.5 26.5v4M25.5 26.5v4"></path><path d="M29 22l10-7"></path></svg></span>
+              <span class="hwc-trust__text"><span class="hwc-trust__label">TESLİMAT</span><span class="hwc-trust__title">Ücretsiz Kargo</span><span class="hwc-trust__body">Türkiye'nin her yerine kargo ücretsizdir.</span></span>
+            </li>
+            <li class="hwc-trust__item" style="--i: 3;">
+              <span class="hwc-trust__icon" aria-hidden="true"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"><path d="M8 15h17a7 7 0 0 1 7 7v10a7 7 0 0 1-7 7H13a7 7 0 0 1-7-7V17a2 2 0 0 1 2-2z"></path><circle cx="19" cy="27" r="5.5"></circle><circle cx="19" cy="27" r="1.2"></circle><path d="M32 33h11v4H32"></path><path d="M35.5 33v1.6M39 33v1.6"></path></svg></span>
+              <span class="hwc-trust__text"><span class="hwc-trust__label">ÖLÇÜ</span><span class="hwc-trust__title">İstediğiniz Ölçüde</span><span class="hwc-trust__body">Alanınıza uygun ölçüde de üretiyoruz.</span><a class="hwc-trust__link" href="/pages/ozel-uretim-siparisleri">Teklif alın<svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"></path></svg></a></span>
+            </li>
+            </ul>
           </div>
         </section>
 
@@ -135,70 +152,22 @@
             <h2>Koleksiyonları Keşfedin</h2>
             <p>Yaşam alanınıza uygun yemek masası, çalışma masası ve yan sehpa seçeneklerini inceleyin.</p>
           </div>
-          <div class="collections" id="collections"></div>
+          <div class="ctiles" id="collections"></div>
         </section>
 
         <section class="section" id="cok-satanlar" data-page="home">
-          <div class="section-head row">
-            <div>
-              <h2>Çok Satanlar</h2>
-              <p>En çok tercih edilen modeller. Her birini 3D showroom'da da inceleyebilirsiniz.</p>
-            </div>
-            <div class="row-nav">
-              <a class="text-link" href="/koleksiyon/tum-masalar">Tümünü gör →</a>
-              <button class="round-btn" id="bestPrev" aria-label="Geri">‹</button>
-              <button class="round-btn" id="bestNext" aria-label="İleri">›</button>
-            </div>
-          </div>
-          <div class="hrow" id="bestRow"></div>
-        </section>
-
-        <section class="section collection-page" id="urunler" data-page="koleksiyon">
-          <nav class="crumbs" aria-label="Sayfa yolu"><a href="/">Ana sayfa</a><span>/</span><span>Koleksiyonlar</span></nav>
           <div class="section-head">
-            <h1 id="collTitle">Tüm Ürünler</h1>
-            <p id="collIntro"></p>
+            <h2>Çok Satanlar</h2>
           </div>
-          <div class="filters" id="filters"></div>
-          <div class="coll-bar">
-            <span id="collCount"></span>
-            <label class="stock-toggle"><input type="checkbox" id="stockOnly" /> Sadece stokta olanlar</label>
-            <label class="sort">Sırala <select id="sortSel"></select></label>
-          </div>
-          <div class="grid" id="grid"></div>
+          <div class="pgrid three" id="bestRow"></div>
         </section>
 
+        <section class="section collection-page" id="urunler" data-page="koleksiyon"></section>
 
-        <section data-page="koleksiyon" class="section guide" id="secim-rehberi">
-          <div class="guide-text">
-            <h2>Önce kullanım, sonra malzeme ve form</h2>
-            <p>Doğru masa seçimi görünümden önce günlük ihtiyacı anlamakla başlar. Çalışma masasında ekipman derinliği, yemek masasında sandalye sayısı, toplantı masasında ortak kullanım alanı önceliklidir. Masif ahşap doğal ve sakin, epoksi detaylar daha belirgin bir odak oluşturur.</p>
-            <h3>Koleksiyonu dört adımda daraltın</h3>
-            <p>Kullanım amacını belirledikten sonra odanın net ölçüsünü alın. Ardından yuvarlak veya dikdörtgen formu, ahşap ve epoksi tercihini, son olarak ayak tasarımını değerlendirin.</p>
-            <table class="steps-table">
-              <thead><tr><th>Adım</th><th>Karar</th></tr></thead>
-              <tbody>
-                <tr><td>1</td><td>Çalışma, yemek veya toplantı kullanımı</td></tr>
-                <tr><td>2</td><td>Odanın ve geçişlerin ölçüsü</td></tr>
-                <tr><td>3</td><td>Form, malzeme ve kenar seçimi</td></tr>
-                <tr><td>4</td><td>Ayak tipi ve renk tercihi</td></tr>
-              </tbody>
-            </table>
-            <p class="small">Bu öneriler genel planlama içindir; ürünün ayak yapısı, sandalye ölçüsü ve mekân koşulları sonucu etkileyebilir.</p>
-            <a class="text-link" href="/olcu-rehberi">Masa ölçü rehberini inceleyin →</a>
-          </div>
-          <figure class="guide-media">
-            <img src="https://cdn.shopify.com/s/files/1/0839/5125/5781/files/hf_20260808_205222_ac0e44bc-c9a0-4e10-84fb-9c0b9f121b4e.png?width=900" alt="Yuvarlak masif ceviz yemek masası" loading="lazy" />
-          </figure>
-        </section>
 
-        <section class="section custom-strip" data-page="koleksiyon">
-          <div>
-            <h2>Standart modelden özel çözüme</h2>
-            <p>Beğendiğiniz modelin ölçüsü veya ayrıntıları mekânınıza uymuyorsa özel üretim uygunluğu değerlendirilebilir. Tabla ölçüsü, ahşap türü, ton, kenar ve ayak seçenekleri üretim koşullarına göre netleştirilir.</p>
-          </div>
-          <a class="btn btn-dark btn-lg" href="/ozel-uretim">Özel üretim hakkında sorun</a>
-        </section>
+
+
+
 
         <section class="band" data-page="home">
           <div class="band-inner">
@@ -288,8 +257,8 @@
             <h2>Aradığınız ölçü listede yok mu?</h2>
             <p>Ürün sayfalarında en çok tercih edilen ölçüleri sunuyoruz. Farklı bir ölçüye ihtiyacınız varsa alanınızın ölçülerini ve tercihlerinizi paylaşın; üretim olanaklarını değerlendirip size özel teklif hazırlayalım.</p>
             <div class="cta-row">
-              <a class="btn btn-dark btn-lg" href="/ozel-uretim">Özel üretim teklifi alın</a>
-              <a class="btn btn-outline btn-lg" href="/olcu-rehberi">Ölçü rehberine bakın</a>
+              <a class="btn btn-dark btn-lg" href="/pages/ozel-uretim-siparisleri">Özel üretim teklifi alın</a>
+              <a class="btn btn-outline btn-lg" href="/pages/oturma-ve-masa-boyutu-rehberi">Ölçü rehberine bakın</a>
             </div>
           </div>
           <figure><img src="https://hwcfurniture.com/cdn/shop/files/ceviz-river-epoksi-okyanus-mavisi.webp?width=1400" alt="Okyanus mavisi epoksili ceviz river masa detayı" loading="lazy" /></figure>
@@ -300,7 +269,7 @@
           <div>
             <h2>Biz HWC'yiz</h2>
             <p>HWC Furniture'ı 2021 yılında Ankara'da iki kişi kurduk: Mustafa ve Safa. Bugün 300 m²'lik atölyemizde her siparişle başından sonuna bizzat ilgileniyoruz. Sorularınızı yanıtlayan, ürününüz için ahşabı seçen ve teslimata hazırlayan ekip yine biziz.</p>
-            <div class="cta-row"><a class="btn btn-outline btn-lg" href="/hakkimizda">Hikayemizi okuyun</a></div>
+            <div class="cta-row"><a class="btn btn-outline btn-lg" href="/pages/about">Hikayemizi okuyun</a></div>
           </div>
         </section>
 
@@ -412,12 +381,12 @@
               <h2>Karar vermenize yardımcı olalım</h2>
               <p>Masa seçimi, ahşap türleri ve bakım üzerine rehber yazılarımız.</p>
             </div>
-            <a class="text-link" href="/blog">Tüm yazılar →</a>
+            <a class="text-link" href="/blogs/rehber">Tüm yazılar →</a>
           </div>
           <div class="posts" id="homePosts"></div>
         </section>
 
-        <section data-page="home sss koleksiyon urun" class="section faq" id="sss">
+        <section data-page="home sss urun" class="section faq" id="sss">
           <div class="section-head">
             <p class="kicker">Merak edilenler</p>
             <h2>Sıkça Sorulan Sorular</h2>
@@ -438,7 +407,7 @@
               <details><summary>Masa nasıl teslim ediliyor, kurulum gerekiyor mu?</summary><p>Masalar tabla ve ayaklar ayrı olacak şekilde, koruyucu ambalajıyla gönderilir. Birleştirme işlemi basittir ve gerekli bağlantı elemanları kutudan çıkar.</p></details>
               <h3>Ürünler ve Ölçüler</h3>
               <details><summary>Masa yüksekliği kaç cm?</summary><p>Tüm yemek ve çalışma masalarımızın standart yüksekliği 76 cm'dir.</p></details>
-              <details><summary>Listede olmayan bir ölçü istiyorum, mümkün mü?</summary><p>Evet. Ürün sayfalarındaki ölçüler en çok tercih edilenlerdir; alanınıza uygun özel ölçü üretiyoruz. <a href="/ozel-uretim">Özel Üretim</a> bölümünden teklif alabilirsiniz; doğru ölçü için <a href="/olcu-rehberi">Oturma ve Masa Boyutu Rehberi</a>'ne bakabilirsiniz.</p></details>
+              <details><summary>Listede olmayan bir ölçü istiyorum, mümkün mü?</summary><p>Evet. Ürün sayfalarındaki ölçüler en çok tercih edilenlerdir; alanınıza uygun özel ölçü üretiyoruz. <a href="/pages/ozel-uretim-siparisleri">Özel Üretim</a> bölümünden teklif alabilirsiniz; doğru ölçü için <a href="/pages/oturma-ve-masa-boyutu-rehberi">Oturma ve Masa Boyutu Rehberi</a>'ne bakabilirsiniz.</p></details>
               <details><summary>Ahşabın rengi ve deseni görseldeki gibi mi olacak?</summary><p>Ürünlerimiz masif ahşaptan el yapımı olarak üretilir. Damar yapısı, doğal kenar formu ve ton her ağaçta farklıdır; bu nedenle her parça kendine özgüdür ve görselden küçük farklılıklar gösterebilir.</p></details>
               <details><summary>Yüzey nasıl korunuyor?</summary><p>Masif ahşap yüzeylerde Rubio Monocoat Oil Plus 2C uygulaması kullanıyoruz. Bu uygulama ahşabın dokusunu korur, lekelenmeye karşı direnç sağlar ve gerektiğinde noktasal olarak yenilenebilir.</p></details>
               <details><summary>Bakımı nasıl yapılır?</summary><p>Yüzeyi nemli yumuşak bir bezle silin, ardından kurulayın. Doğrudan sıcak tencere/bardak koymayın, uzun süreli doğrudan güneş ışığından ve aşırı nemden kaçının. Aşındırıcı veya çözücü içeren temizleyiciler kullanmayın.</p></details>
@@ -480,24 +449,24 @@
             </div>
             <div>
               <h4>Koleksiyonlar</h4>
-              <a href="/koleksiyon/epoksi-masalar">Epoksi Masalar</a>
-              <a href="/koleksiyon/tum-masalar">Tüm Ürünler</a>
-              <a href="/koleksiyon/yemek-masalari">Yemek Masaları</a>
-              <a href="/koleksiyon/calisma-masalari">Çalışma Masaları</a>
-              <a href="/koleksiyon/hemen-teslim">Hemen Teslim</a>
+              <a href="/collections/epoksi-masa-modelleri">Epoksi Masalar</a>
+              <a href="/collections/tum-masalar">Tüm Ürünler</a>
+              <a href="/collections/yemek-mutfak-masalari">Yemek Masaları</a>
+              <a href="/collections/ofis-ve-calisma-masalari">Çalışma Masaları</a>
+              <a href="/collections/hemen-teslim-urunler">Hemen Teslim</a>
             </div>
             <div>
               <h4>Bilgi</h4>
-              <a href="/iletisim">İletişim</a>
-              <a href="/hakkimizda">Hakkımızda</a>
-              <a href="/ozel-uretim">Özel Üretim Siparişleri</a>
-              <a href="/olcu-rehberi">Oturma ve Masa Boyutu Rehberi</a>
-              <a href="/sss">Sıkça Sorulan Sorular</a>
+              <a href="/pages/contact">İletişim</a>
+              <a href="/pages/about">Hakkımızda</a>
+              <a href="/pages/ozel-uretim-siparisleri">Özel Üretim Siparişleri</a>
+              <a href="/pages/oturma-ve-masa-boyutu-rehberi">Oturma ve Masa Boyutu Rehberi</a>
+              <a href="/pages/faq">Sıkça Sorulan Sorular</a>
               <a href="https://hwcfurniture.com/pages/iade-ve-degisim">İade ve Değişim</a>
               <a href="https://hwcfurniture.com/pages/mesafeli-satis-sozlesmesi">Mesafeli Satış Sözleşmesi</a>
               <a href="https://hwcfurniture.com/pages/satis-kosullari">Satış Koşulları</a>
               <a href="https://hwcfurniture.com/pages/gizlilik-ve-veri-politikasi">Gizlilik ve Veri Politikası</a>
-              <a href="/blog">Blog</a>
+              <a href="/blogs/rehber">Blog</a>
             </div>
             <div>
               <h4>İletişim</h4>

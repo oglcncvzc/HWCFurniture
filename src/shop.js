@@ -1,7 +1,8 @@
 // Sayfa yönlendirme + mağaza sayfaları (ana sayfa bölümleri, koleksiyon, ürün detay)
 import { PRODUCTS, PRODUCT_LIST, STATION_OF, defaultSelection, findVariant, shipTime, formatTRY, productUrl } from './catalog.js';
 import { EPOXY } from './three/textures.js';
-import { SLIDES, INSTAGRAM, INSTAGRAM_URL, COLLECTION_PAGES, TYPE_TO_COLLECTION } from './site-data.js';
+import { SLIDES, INSTAGRAM, INSTAGRAM_URL } from './site-data.js';
+import { cardHTML, renderCollection, initCollection, initCards, COLL_BY, OLD_COLLECTION_SLUGS, TYPE_TO_COLLECTION } from './collection.js';
 import { addToCart, checkoutUrl } from './cart.js';
 import { $, $$, img, esc, priceInfo, discount, variantTitle, WHATSAPP } from './util.js';
 import { renderBlogList, renderArticle, renderHomePosts } from './blog.js';
@@ -11,42 +12,12 @@ const body = document.body;
 let deps = {};
 
 // ---------------------------------------------------------------------------
-// Ürün kartı
-// ---------------------------------------------------------------------------
-export function cardHTML(p) {
-  const { price, compare, soldOut, multi } = priceInfo(p);
-  const d = discount(price, compare);
-  const badges = [
-    soldOut ? '<span class="badge dark">Tükendi</span>' : '',
-    d ? `<span class="badge sale">%${d} indirim</span>` : '',
-    p.tags.includes('cok-satan') ? '<span class="badge">Çok satan</span>' : '',
-    p.tags.includes('hemen-teslim') ? '<span class="badge">Hemen teslim</span>' : '',
-  ].join('');
-  const has3d = !!STATION_OF[p.handle];
-  return `
-  <article class="card">
-    <div class="card-wrap">
-      <a class="card-media" href="/urun/${p.handle}" aria-label="${esc(p.title)}">
-        <img src="${img(p.images[0], 640)}" alt="${esc(p.title)}" loading="lazy" />
-        ${p.images[1] ? `<img class="alt" src="${img(p.images[1], 640)}" alt="" loading="lazy" />` : ''}
-        <div class="badges">${badges}</div>
-      </a>
-      ${has3d ? `<button class="card-3d" data-open3d="${p.handle}"><span class="cube"></span>3D'de incele</button>` : ''}
-    </div>
-    <div class="card-body">
-      <p class="card-type">${esc(p.type)}</p>
-      <h3><a href="/urun/${p.handle}">${esc(p.title)}</a></h3>
-      <div class="price">${multi ? '<small>başlayan</small>' : ''}<strong>${formatTRY(price)}</strong>${d ? `<s>${formatTRY(compare)}</s>` : ''}</div>
-      <p class="ship ${soldOut ? 'out' : ''}">${soldOut ? 'Şu an stokta yok' : shipTime(p)}</p>
-    </div>
-  </article>`;
-}
-
-// ---------------------------------------------------------------------------
 // Ana sayfa: carousel (ilk slayt 3D showroom)
 // ---------------------------------------------------------------------------
 let slide = 0;
 let slideTimer;
+
+const heroPrice = (n) => `${new Intl.NumberFormat('tr-TR').format(n)} ₺`;
 
 function initHero() {
   const wrap = $('#slides');
@@ -63,9 +34,9 @@ function initHero() {
       <div class="hero-content">
         <p class="kicker">${esc(s.kicker)}</p>
         <h2 class="slide-title">${s.title}</h2>
-        <p class="lead slide-price">${compare ? `<s>${formatTRY(compare)}</s> ` : ''}<strong>${formatTRY(price)}</strong>'den başlayan fiyatlar${s.note ? `<br /><span>${esc(s.note)}</span>` : ''}</p>
+        <p class="lead slide-price">${compare ? `<s>${heroPrice(compare)}</s> ` : ''}<strong>${heroPrice(price)}</strong>'den başlayan fiyatlar${s.note ? `<br /><span>${esc(s.note)}</span>` : ''}</p>
         <div class="cta-row">
-          <a class="btn btn-light btn-lg" href="/urun/${s.handle}">${esc(s.cta)} <span class="arrow">→</span></a>
+          <a class="btn btn-light btn-lg" href="/products/${s.handle}">${esc(s.cta)} <span class="arrow">→</span></a>
           ${STATION_OF[s.handle] ? `<button class="btn btn-outline-light btn-lg" data-open3d="${s.handle}">3D showroom'da gör</button>` : ''}
         </div>
       </div>`;
@@ -127,20 +98,26 @@ export function showShowroomSlide() {
 // Ana sayfa: çok satanlar, koleksiyon kartları, Instagram şeridi
 // ---------------------------------------------------------------------------
 function initHome() {
-  const best = PRODUCT_LIST.filter((p) => p.tags.includes('cok-satan'));
+  // güven bandı: görünür olunca öğeler sırayla belirir
+  const trust = $('#avantajlar');
+  if ('IntersectionObserver' in window) {
+    const tio = new IntersectionObserver((en) => en.forEach((x) => x.isIntersecting && (trust.classList.add('is-visible'), tio.disconnect())), { threshold: 0.2 });
+    tio.observe(trust);
+  } else trust.classList.add('is-visible');
+  const best = (COLL_BY['cok-satanlar']?.products || []).map((h) => PRODUCTS[h]);
   $('#bestRow').innerHTML = best.map(cardHTML).join('');
 
   const tiles = [
-    { slug: 'epoksi-masalar', title: 'Epoksi Masalar', img: 'https://hwcfurniture.com/cdn/shop/collections/hf_20260808_055937_eccdda4b-b4cb-4290-8a1c-997e0a9e2a69.png' },
-    { slug: 'yemek-masalari', title: 'Yemek Masaları', img: 'https://hwcfurniture.com/cdn/shop/collections/hf_20260808_141233_a408d6c8-6916-47a2-ab6f-8930f4dd5e67.png' },
-    { slug: 'calisma-masalari', title: 'Çalışma Masaları', img: 'https://hwcfurniture.com/cdn/shop/collections/endustriyel-masif-ceviz-calisma-masasi-chocolate-yasam-alani.webp' },
-    { slug: 'sehpalar', title: 'Orta ve Yan Sehpalar', img: 'https://hwcfurniture.com/cdn/shop/collections/hwc-u16-08.webp' },
+    { slug: 'epoksi-masa-modelleri', title: 'Epoksi Masalar', img: 'https://hwcfurniture.com/cdn/shop/collections/hf_20260808_055937_eccdda4b-b4cb-4290-8a1c-997e0a9e2a69.png' },
+    { slug: 'yemek-mutfak-masalari', title: 'Yemek Masaları', img: 'https://hwcfurniture.com/cdn/shop/collections/hf_20260808_141233_a408d6c8-6916-47a2-ab6f-8930f4dd5e67.png' },
+    { slug: 'ofis-ve-calisma-masalari', title: 'Çalışma Masaları', img: 'https://hwcfurniture.com/cdn/shop/collections/endustriyel-masif-ceviz-calisma-masasi-chocolate-yasam-alani.webp' },
+    { slug: 'sehpa-modelleri', title: 'Orta ve Yan Sehpalar', img: 'https://hwcfurniture.com/cdn/shop/collections/hwc-u16-08.webp' },
   ];
   $('#collections').innerHTML = tiles
     .map(
-      (c) => `<a class="collection" href="/koleksiyon/${c.slug}">
-        <img src="${img(c.img, 700)}" alt="" loading="lazy" />
-        <span>${c.title} <i>→</i></span>
+      (c) => `<a class="ctile" href="/collections/${c.slug}">
+        <span class="ctile-img"><img src="${img(c.img, 800)}" alt="${c.title}" loading="lazy" /></span>
+        <span class="ctile-title">${c.title}</span>
       </a>`
     )
     .join('');
@@ -174,9 +151,9 @@ function initHome() {
     if (it.video) openVideo(it);
     else window.open(INSTAGRAM_URL, '_blank', 'noopener');
   });
-  for (const [btn, dir] of [['#igPrev', -1], ['#igNext', 1], ['#bestPrev', -1], ['#bestNext', 1]]) {
+  for (const [btn, dir] of [['#igPrev', -1], ['#igNext', 1]]) {
     $(btn).addEventListener('click', () => {
-      const row = $(btn.startsWith('#ig') ? '#igRow' : '#bestRow');
+      const row = $('#igRow');
       row.scrollBy({ left: dir * row.clientWidth * 0.8, behavior: 'smooth' });
     });
   }
@@ -201,46 +178,6 @@ function closeVideo() {
 }
 
 // ---------------------------------------------------------------------------
-// Koleksiyon sayfası
-// ---------------------------------------------------------------------------
-const SORTS = {
-  onerilen: { label: 'Önerilen', fn: (a, b) => rank(a) - rank(b) },
-  'fiyat-artan': { label: 'Fiyat: düşükten yükseğe', fn: (a, b) => priceInfo(a).price - priceInfo(b).price },
-  'fiyat-azalan': { label: 'Fiyat: yüksekten düşüğe', fn: (a, b) => priceInfo(b).price - priceInfo(a).price },
-  indirim: { label: 'En yüksek indirim', fn: (a, b) => discount(priceInfo(b).price, priceInfo(b).compare) - discount(priceInfo(a).price, priceInfo(a).compare) },
-};
-const rank = (p) => (p.tags.includes('cok-satan') ? 0 : 1) + (priceInfo(p).soldOut ? 2 : 0);
-const coll = { sort: 'onerilen', stock: false };
-
-function renderCollection(slug) {
-  const c = COLLECTION_PAGES.find((x) => x.slug === slug) || COLLECTION_PAGES[0];
-  $('#collTitle').textContent = c.title;
-  $('#collIntro').textContent = c.intro;
-  $('#filters').innerHTML = COLLECTION_PAGES.map(
-    (x) => `<a href="/koleksiyon/${x.slug}" class="${x.slug === c.slug ? 'on' : ''}">${x.title} <span>${PRODUCT_LIST.filter(x.test).length}</span></a>`
-  ).join('');
-  let list = PRODUCT_LIST.filter(c.test);
-  if (coll.stock) list = list.filter((p) => !priceInfo(p).soldOut);
-  list = [...list].sort(SORTS[coll.sort].fn);
-  $('#collCount').textContent = `${list.length} ürün`;
-  $('#grid').innerHTML = list.map(cardHTML).join('') || '<p class="empty">Bu filtreye uyan ürün yok.</p>';
-  document.title = `${c.title} | HWC`;
-  return c.title;
-}
-
-function initCollectionControls() {
-  $('#sortSel').innerHTML = Object.entries(SORTS).map(([k, s]) => `<option value="${k}">${s.label}</option>`).join('');
-  $('#sortSel').addEventListener('change', (e) => {
-    coll.sort = e.target.value;
-    renderCollection(currentArg);
-  });
-  $('#stockOnly').addEventListener('change', (e) => {
-    coll.stock = e.target.checked;
-    renderCollection(currentArg);
-  });
-}
-
-// ---------------------------------------------------------------------------
 // Ürün detay sayfası
 // ---------------------------------------------------------------------------
 const pdp = { handle: null, sel: {}, qty: 1, img: 0 };
@@ -256,7 +193,7 @@ function swatch(label) {
 function renderProduct(handle) {
   const p = PRODUCTS[handle];
   if (!p) {
-    $('#pdp').innerHTML = `<div class="notfound"><h1>Ürün bulunamadı</h1><p>Aradığınız ürün kaldırılmış olabilir.</p><a class="btn btn-dark" href="/koleksiyon/tum-masalar">Tüm ürünler</a></div>`;
+    $('#pdp').innerHTML = `<div class="notfound"><h1>Ürün bulunamadı</h1><p>Aradığınız ürün kaldırılmış olabilir.</p><a class="btn btn-dark" href="/collections/tum-masalar">Tüm ürünler</a></div>`;
     return 'Ürün bulunamadı';
   }
   if (pdp.handle !== handle) {
@@ -269,13 +206,13 @@ function renderProduct(handle) {
   const d = discount(v[4], v[5]);
   const has3d = !!STATION_OF[handle];
   const collSlug = TYPE_TO_COLLECTION[p.type] || 'tum-masalar';
-  const collTitle = COLLECTION_PAGES.find((c) => c.slug === collSlug).title;
+  const collTitle = COLL_BY[collSlug]?.title || 'Tüm Masalar';
   const optText = p.options.map((o) => pdp.sel[o.name]).join(' / ');
   const wa = `${WHATSAPP}?text=${encodeURIComponent(`Merhaba, "${p.title}" (${optText}) hakkında bilgi almak istiyorum.`)}`;
-  const related = PRODUCT_LIST.filter((x) => x.handle !== handle && (TYPE_TO_COLLECTION[x.type] || '') === collSlug).slice(0, 4);
+  const related = (COLL_BY[collSlug]?.products || []).filter((h) => h !== handle).slice(0, 4).map((h) => PRODUCTS[h]);
 
   $('#pdp').innerHTML = `
-    <nav class="crumbs" aria-label="Sayfa yolu"><a href="/">Ana sayfa</a><span>/</span><a href="/koleksiyon/${collSlug}">${collTitle}</a><span>/</span><span>${esc(p.title)}</span></nav>
+    <nav class="crumbs" aria-label="Sayfa yolu"><a href="/">Ana sayfa</a><span>/</span><a href="/collections/${collSlug}">${collTitle}</a><span>/</span><span>${esc(p.title)}</span></nav>
     <div class="pdp-grid">
       <div class="pdp-gallery">
         <button class="pdp-main" data-zoom aria-label="Fotoğrafı büyüt">
@@ -326,13 +263,13 @@ function renderProduct(handle) {
         <a class="wa-line" href="${wa}" target="_blank" rel="noopener">Sorunuz mu var? WhatsApp'tan yazın →</a>
         <div class="pdp-acc">
           <details open><summary>Ürün açıklaması</summary><p>${esc(p.desc)}</p></details>
-          <details><summary>Ölçü ve seçenekler</summary><p>${p.options.map((o) => `<b>${esc(o.name)}:</b> ${o.values.map(esc).join(', ')}`).join('<br />')}<br /><b>Yükseklik:</b> ${/Sehpa/.test(p.type) ? (p.type === 'Orta Sehpa' ? '45 cm' : '53 cm') : p.tags.includes('linak') ? 'elektrikli, ayarlanabilir' : '76 cm'}<br />Listede olmayan ölçüler için <a href="/ozel-uretim">özel üretim</a> talep edebilirsiniz.</p></details>
+          <details><summary>Ölçü ve seçenekler</summary><p>${p.options.map((o) => `<b>${esc(o.name)}:</b> ${o.values.map(esc).join(', ')}`).join('<br />')}<br /><b>Yükseklik:</b> ${/Sehpa/.test(p.type) ? (p.type === 'Orta Sehpa' ? '45 cm' : '53 cm') : p.tags.includes('linak') ? 'elektrikli, ayarlanabilir' : '76 cm'}<br />Listede olmayan ölçüler için <a href="/pages/ozel-uretim-siparisleri">özel üretim</a> talep edebilirsiniz.</p></details>
           <details><summary>Yüzey ve bakım</summary><p>Masif ahşap yüzeylerde Rubio Monocoat Oil Plus 2C kullanıyoruz; ahşabın dokusunu korur, lekelenmeye karşı direnç sağlar ve noktasal yenilenebilir. Yüzeyi nemli yumuşak bir bezle silip kurulayın; doğrudan sıcak tencere koymayın, uzun süreli güneş ve aşırı nemden kaçının.</p></details>
           <details><summary>Teslimat ve iade</summary><p>Masif ahşap ürünler 3–4, epoksi ürünler 4–6 haftada hazırlanır; hemen teslim ürünler stoktan gönderilir. Tabla ve ayaklar ayrı, koruyucu ambalajla gelir; kurulum basittir. Standart ölçülerde teslimden itibaren 14 gün içinde iade veya değişim yapılabilir; kişiye özel ölçüler kusur olmadıkça iade kapsamı dışındadır. <a href="https://hwcfurniture.com/pages/iade-ve-degisim" target="_blank" rel="noopener">İade ve Değişim</a></p></details>
         </div>
       </div>
     </div>
-    ${related.length ? `<section class="related"><h2>Bunlar da ilginizi çekebilir</h2><div class="grid">${related.map(cardHTML).join('')}</div></section>` : ''}
+    ${related.length ? `<section class="related"><h2>Bunlar da ilginizi çekebilir</h2><div class="pgrid four">${related.map(cardHTML).join('')}</div></section>` : ''}
   `;
   document.title = `${p.title} | HWC`;
   return p.title;
@@ -369,26 +306,46 @@ function initProductEvents() {
 // ---------------------------------------------------------------------------
 // Yönlendirme
 // ---------------------------------------------------------------------------
-const PAGES = {
-  '': { page: 'home', title: 'Masif Ahşap ve Epoksi Masa Modelleri | HWC' },
-  koleksiyon: { page: 'koleksiyon' },
-  urun: { page: 'urun' },
-  hakkimizda: { page: 'hakkimizda', title: 'Hakkımızda | HWC', crumb: 'Hakkımızda' },
-  'ozel-uretim': { page: 'ozel-uretim', title: 'Özel Üretim Siparişleri | HWC', crumb: 'Özel Üretim Siparişleri' },
-  'olcu-rehberi': { page: 'olcu-rehberi', title: 'Oturma ve Masa Boyutu Rehberi | HWC', crumb: 'Oturma ve Masa Boyutu Rehberi' },
-  sss: { page: 'sss', title: 'Sıkça Sorulan Sorular | HWC', crumb: 'Sıkça Sorulan Sorular' },
-  iletisim: { page: 'iletisim', title: 'İletişim | HWC', crumb: 'İletişim' },
-  blog: { page: 'blog' },
-  arama: { page: 'arama' },
+const TITLE_HOME = 'Masif Ahşap ve Epoksi Masa Modelleri | HWC';
+const INFO = {
+  about: { page: 'hakkimizda', title: 'Hakkımızda | HWC', crumb: 'Hakkımızda' },
+  'ozel-uretim-siparisleri': { page: 'ozel-uretim', title: 'Özel Üretim Siparişleri | HWC', crumb: 'Özel Üretim Siparişleri' },
+  'oturma-ve-masa-boyutu-rehberi': { page: 'olcu-rehberi', title: 'Oturma ve Masa Boyutu Rehberi | HWC', crumb: 'Oturma ve Masa Boyutu Rehberi' },
+  faq: { page: 'sss', title: 'Sıkça Sorulan Sorular | HWC', crumb: 'Sıkça Sorulan Sorular' },
+  contact: { page: 'iletisim', title: 'İletişim | HWC', crumb: 'İletişim' },
 };
+// İlk sürümdeki kısa adresler → orijinal adresler
+const OLD = { hakkimizda: '/pages/about', 'ozel-uretim': '/pages/ozel-uretim-siparisleri', 'olcu-rehberi': '/pages/oturma-ve-masa-boyutu-rehberi', sss: '/pages/faq', iletisim: '/pages/contact' };
+
+function canonical(parts) {
+  const [a, b] = parts;
+  if (a === 'en') return '/' + parts.slice(1).join('/');
+  if (OLD[a]) return OLD[a];
+  if (a === 'koleksiyon') return `/collections/${OLD_COLLECTION_SLUGS[b] || b || 'tum-masalar'}`;
+  if (a === 'urun') return `/products/${b}`;
+  if (a === 'blog') return b ? `/blogs/rehber/${b}` : '/blogs/rehber';
+  if (a === 'arama') return `/search${location.search}`;
+  if (a === 'collections' && !b) return '/collections/tum-masalar';
+  if (a === 'collections' && b === 'all') return '/collections/tum-masalar';
+  return null;
+}
 let currentArg = '';
 
 function parse() {
-  const parts = location.pathname.replace(/^\/+|\/+$/g, '').split('/');
-  const def = PAGES[parts[0]] || { page: 'notfound', title: 'Sayfa bulunamadı | HWC', crumb: 'Sayfa bulunamadı' };
-  const arg = decodeURIComponent(parts[1] || '');
-  if (def.page === 'blog' && arg) return { page: 'yazi', arg };
-  return { ...def, arg };
+  const parts = location.pathname.replace(/^\/+|\/+$/g, '').split('/').map(decodeURIComponent);
+  const to = canonical(parts);
+  if (to) {
+    history.replaceState(null, '', to + (to.includes('?') ? '' : location.search.replace(/^\?q=.*/, '')) + location.hash);
+    return parse();
+  }
+  const [a, b, c] = parts;
+  if (!a) return { page: 'home', title: TITLE_HOME };
+  if (a === 'collections') return { page: 'koleksiyon', arg: b };
+  if (a === 'products') return { page: 'urun', arg: b };
+  if (a === 'pages' && INFO[b]) return INFO[b];
+  if (a === 'blogs' && b === 'rehber') return c ? { page: 'yazi', arg: c } : { page: 'blog' };
+  if (a === 'search') return { page: 'arama' };
+  return { page: 'notfound', title: 'Sayfa bulunamadı | HWC', crumb: 'Sayfa bulunamadı' };
 }
 
 export function route({ keepScroll = false } = {}) {
@@ -409,7 +366,7 @@ export function route({ keepScroll = false } = {}) {
   $('#pageCrumb').innerHTML = crumb ? `<a href="/">Ana sayfa</a><span>/</span><span>${esc(crumb)}</span>` : '';
   $$('.nav a, .drop a').forEach((a) => a.classList.toggle('current', a.getAttribute('href') === location.pathname));
   body.classList.remove('menu-open');
-  $('.nav-drop')?.classList.remove('open');
+  $$('.nav-drop').forEach((d) => d.classList.remove('open'));
   deps.updatePause?.();
   if (keepScroll) return;
   const id = location.hash.slice(1);
@@ -436,7 +393,8 @@ export function initShop(d) {
   initHome();
   renderHomePosts();
   initSearch(navigate);
-  initCollectionControls();
+  initCollection();
+  initCards(navigate);
   initProductEvents();
   $('#videoModal').addEventListener('click', (e) => {
     if (e.target.closest('[data-vclose]') || e.target.id === 'videoModal') closeVideo();

@@ -19,30 +19,13 @@ const pick = (s, re) => (s.match(re) || [])[1] || '';
 const text = (h) => decode(h.replace(/<[^>]+>/g, ' ')).replace(/\s+/g, ' ').trim();
 
 // Yazı içindeki bağlantıları yeni sitenin adreslerine çevir
-const PAGE_MAP = {
-  'ozel-uretim-siparisleri': '/ozel-uretim',
-  'oturma-ve-masa-boyutu-rehberi': '/olcu-rehberi',
-  faq: '/sss',
-  contact: '/iletisim',
-  about: '/hakkimizda',
-};
-const COLL_MAP = {
-  'epoksi-masa-modelleri': 'epoksi-masalar',
-  'yemek-mutfak-masalari': 'yemek-masalari',
-  'ofis-ve-calisma-masalari': 'calisma-masalari',
-  'hemen-teslim-urunler': 'hemen-teslim',
-};
 function rewriteHref(href) {
   const m = href.match(/^(?:https?:\/\/(?:www\.)?hwcfurniture\.com)?(\/[^"#?]*)?([?#][^"]*)?$/i);
   if (!m || !m[1]) return href;
   const path = m[1].replace(/^\/en(?=\/)/, '');
-  let r;
-  if ((r = path.match(/^\/blogs\/rehber\/([^/]+)/))) return `/blog/${r[1]}`;
-  if (/^\/blogs\/rehber\/?$/.test(path)) return '/blog';
-  if ((r = path.match(/^\/products\/([^/]+)/))) return `/urun/${r[1]}`;
-  if ((r = path.match(/^\/collections\/([^/]+)/))) return `/koleksiyon/${COLL_MAP[r[1]] || 'tum-masalar'}`;
-  if ((r = path.match(/^\/pages\/([^/]+)/)) && PAGE_MAP[r[1]]) return PAGE_MAP[r[1]];
-  if (path === '/') return '/';
+  // site adresleri orijinal mağazayla aynı: /products, /collections, /pages, /blogs/rehber
+  if (/^\/(products|collections|blogs\/rehber)(\/|$)/.test(path) || path === '/') return path;
+  if (/^\/pages\/(about|ozel-uretim-siparisleri|oturma-ve-masa-boyutu-rehberi|faq|contact)$/.test(path)) return path;
   return `${STORE}${path}${m[2] || ''}`;
 }
 

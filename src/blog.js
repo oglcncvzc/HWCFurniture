@@ -9,7 +9,7 @@ const fmtDate = (iso) =>
 const cover = (a, w) => (a.image ? img(a.image, w) : '/hwc-logo.png');
 
 export function postCard(a, { big = false } = {}) {
-  return `<a class="post ${big ? 'post-big' : ''}" href="/blog/${a.handle}">
+  return `<a class="post ${big ? 'post-big' : ''}" href="/blogs/rehber/${a.handle}">
     <img src="${cover(a, big ? 1400 : 700)}" alt="${esc(a.imageAlt || a.title)}" loading="lazy" />
     <div>
       <p class="post-meta">${fmtDate(a.published)} · ${a.minutes} dk okuma</p>
@@ -45,7 +45,7 @@ export function renderArticle(handle) {
   const i = BLOG.findIndex((a) => a.handle === handle);
   const a = BLOG[i];
   if (!a) {
-    $('#article').innerHTML = `<div class="notfound"><h1>Yazı bulunamadı</h1><a class="btn btn-dark" href="/blog">Tüm yazılar</a></div>`;
+    $('#article').innerHTML = `<div class="notfound"><h1>Yazı bulunamadı</h1><a class="btn btn-dark" href="/blogs/rehber">Tüm yazılar</a></div>`;
     return 'Yazı bulunamadı';
   }
   const prev = BLOG[i + 1];
@@ -53,7 +53,7 @@ export function renderArticle(handle) {
   const others = BLOG.filter((x) => x !== a).slice(0, 3);
   const share = `${WHATSAPP.replace('/905438985384', '')}/?text=${encodeURIComponent(`${a.title} — ${location.origin}/blog/${a.handle}`)}`;
   $('#article').innerHTML = `
-    <nav class="crumbs" aria-label="Sayfa yolu"><a href="/">Ana sayfa</a><span>/</span><a href="/blog">Blog</a><span>/</span><span>${esc(a.title)}</span></nav>
+    <nav class="crumbs" aria-label="Sayfa yolu"><a href="/">Ana sayfa</a><span>/</span><a href="/blogs/rehber">Blog</a><span>/</span><span>${esc(a.title)}</span></nav>
     <header class="article-head">
       <p class="post-meta">${fmtDate(a.published)} · ${a.minutes} dk okuma · ${esc(a.author)}</p>
       <h1>${esc(a.title)}</h1>
@@ -67,14 +67,14 @@ export function renderArticle(handle) {
           <h4>Masanızı yerinde görün</h4>
           <p>Koleksiyondaki masaları 3D showroom'da gezip desen ve ölçü seçebilirsiniz.</p>
           <button class="btn btn-dark" data-action="enter">3D Showroom'u gez</button>
-          <a class="btn btn-outline" href="/koleksiyon/tum-masalar">Tüm ürünler</a>
+          <a class="btn btn-outline" href="/collections/tum-masalar">Tüm ürünler</a>
         </div>
         <a class="share" href="${share}" target="_blank" rel="noopener">WhatsApp'ta paylaş</a>
       </aside>
     </div>
     <nav class="article-nav">
-      ${prev ? `<a href="/blog/${prev.handle}"><span>← Önceki yazı</span>${esc(prev.title)}</a>` : '<span></span>'}
-      ${next ? `<a class="next" href="/blog/${next.handle}"><span>Sonraki yazı →</span>${esc(next.title)}</a>` : '<span></span>'}
+      ${prev ? `<a href="/blogs/rehber/${prev.handle}"><span>← Önceki yazı</span>${esc(prev.title)}</a>` : '<span></span>'}
+      ${next ? `<a class="next" href="/blogs/rehber/${next.handle}"><span>Sonraki yazı →</span>${esc(next.title)}</a>` : '<span></span>'}
     </nav>
     <section class="related"><h2>Diğer yazılar</h2><div class="posts">${others.map((x) => postCard(x)).join('')}</div></section>`;
   document.title = `${a.title} | HWC Blog`;

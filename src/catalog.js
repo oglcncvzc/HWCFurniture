@@ -207,8 +207,9 @@ export function shipTime(p) {
   return '3–4 hafta içinde kargoda';
 }
 
+// Shopify mağazasındaki biçim: 24,900.00TL
 export const formatTRY = (n) =>
-  new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY', maximumFractionDigits: 0 }).format(n);
+  `${new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n)}TL`;
 
 export const productUrl = (handle, variantId) => `${STORE}/products/${handle}${variantId ? `?variant=${variantId}` : ''}`;
 export const addToCartUrl = (variantId) => `${STORE}/cart/add?id=${variantId}&quantity=1`;

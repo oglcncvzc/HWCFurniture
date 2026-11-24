@@ -61,15 +61,15 @@ export function render() {
   const list = $('#cartItems');
   if (!list) return;
   if (!items.length) {
-    list.innerHTML = `<div class="cart-empty"><p>Sepetiniz boş.</p><a class="btn btn-outline" href="/koleksiyon/tum-masalar" data-cart-close>Ürünlere göz atın</a></div>`;
+    list.innerHTML = `<div class="cart-empty"><p>Sepetiniz boş.</p><a class="btn btn-outline" href="/collections/tum-masalar" data-cart-close>Ürünlere göz atın</a></div>`;
   } else {
     list.innerHTML = items
       .map((i) => {
         const { p, v } = lookup(i);
         return `<div class="cart-item" data-id="${i.id}">
-          <a href="/urun/${p.handle}" data-cart-close><img src="${img(p.images[0], 200)}" alt="" /></a>
+          <a href="/products/${p.handle}" data-cart-close><img src="${img(p.images[0], 200)}" alt="" /></a>
           <div>
-            <a class="ci-title" href="/urun/${p.handle}" data-cart-close>${esc(p.title)}</a>
+            <a class="ci-title" href="/products/${p.handle}" data-cart-close>${esc(p.title)}</a>
             <p class="ci-var">${esc(variantTitle(v))}</p>
             <div class="ci-row">
               <div class="qty"><button data-q="-1" aria-label="Azalt">−</button><span>${i.qty}</span><button data-q="1" aria-label="Artır">+</button></div>
