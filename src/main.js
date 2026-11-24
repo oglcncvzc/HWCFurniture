@@ -12,115 +12,19 @@ import {
   defaultSelection,
   shipTime,
   formatTRY,
-  productUrl,
-  addToCartUrl,
 } from './catalog.js';
-
-const $ = (s, r = document) => r.querySelector(s);
-const $$ = (s, r = document) => [...r.querySelectorAll(s)];
-const img = (url, w) => `${url}?width=${w}`;
-const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
-const WHATSAPP = 'https://wa.me/905438985384';
+import { $, $$, img, esc, priceInfo, discount, WHATSAPP } from './util.js';
+import { initCart, addToCart } from './cart.js';
+import { initShop, navigate, showShowroomSlide } from './shop.js';
 const body = document.body;
 const isMobile = () => innerWidth < 860;
 
-// ---------------------------------------------------------------------------
-// Ürün yardımcıları
-// ---------------------------------------------------------------------------
-function priceInfo(p) {
-  const avail = p.variants.filter((v) => v[6]);
-  const pool = avail.length ? avail : p.variants;
-  const v = pool.reduce((a, b) => (b[4] < a[4] ? b : a));
-  return { price: v[4], compare: v[5], soldOut: !avail.length, multi: new Set(p.variants.map((x) => x[4])).size > 1 };
-}
-const discount = (price, compare) => (compare && compare > price ? Math.round((1 - price / compare) * 100) : 0);
-
-// ---------------------------------------------------------------------------
-// Ürün ızgarası
-// ---------------------------------------------------------------------------
-const FILTERS = [
-  { id: 'all', label: 'Tümü', test: () => true },
-  { id: 'yemek', label: 'Yemek Masaları', test: (p) => /Yemek/.test(p.type) },
-  { id: 'calisma', label: 'Çalışma Masaları', test: (p) => p.type === 'Çalışma Masası' },
-  { id: 'epoksi', label: 'Epoksi', test: (p) => p.tags.includes('epoksi') },
-  { id: 'sehpa', label: 'Sehpalar', test: (p) => p.tags.includes('sehpa') },
-  { id: 'hemen', label: 'Hemen Teslim', test: (p) => p.tags.includes('hemen-teslim') || p.tags.includes('hazir-stok') },
-];
-const ORDER = (p) => (p.tags.includes('cok-satan') ? 0 : 1) + (priceInfo(p).soldOut ? 2 : 0);
-let activeFilter = 'all';
-
-function cardHTML(p) {
-  const { price, compare, soldOut, multi } = priceInfo(p);
-  const d = discount(price, compare);
-  const badges = [
-    soldOut ? '<span class="badge dark">Tükendi</span>' : '',
-    d ? `<span class="badge sale">%${d} indirim</span>` : '',
-    p.tags.includes('cok-satan') ? '<span class="badge">Çok satan</span>' : '',
-    p.tags.includes('hemen-teslim') ? '<span class="badge">Hemen teslim</span>' : '',
-  ].join('');
-  return `
-  <article class="card">
-    <div class="card-media">
-      <img src="${img(p.images[0], 640)}" alt="${esc(p.title)}" loading="lazy" data-gallery="${p.handle}" />
-      ${p.images[1] ? `<img class="alt" src="${img(p.images[1], 640)}" alt="" loading="lazy" data-gallery="${p.handle}" />` : ''}
-      <div class="badges">${badges}</div>
-      <button class="card-3d" data-open3d="${p.handle}"><span class="cube"></span>3D'de incele</button>
-    </div>
-    <div class="card-body">
-      <p class="card-type">${esc(p.type)}</p>
-      <h3><a href="${productUrl(p.handle)}" target="_blank" rel="noopener">${esc(p.title)}</a></h3>
-      <div class="price">${multi ? '<small>başlayan</small>' : ''}<strong>${formatTRY(price)}</strong>${d ? `<s>${formatTRY(compare)}</s>` : ''}</div>
-      <p class="ship">${soldOut ? 'Şu an stokta yok' : shipTime(p)}</p>
-    </div>
-  </article>`;
-}
-
-function renderGrid() {
-  const f = FILTERS.find((x) => x.id === activeFilter);
-  const list = PRODUCT_LIST.filter(f.test).sort((a, b) => ORDER(a) - ORDER(b));
-  $('#grid').innerHTML = list.map(cardHTML).join('');
-  $$('#filters button').forEach((b) => b.classList.toggle('on', b.dataset.f === activeFilter));
-}
-
-function setFilter(id, scroll) {
-  activeFilter = id;
-  renderGrid();
-  if (scroll) $('#urunler').scrollIntoView({ behavior: 'smooth' });
-}
-
-$('#filters').innerHTML = FILTERS.map(
-  (f) => `<button data-f="${f.id}" role="tab">${f.label} <span>${PRODUCT_LIST.filter(f.test).length}</span></button>`
-).join('');
-$('#filters').addEventListener('click', (e) => {
-  const b = e.target.closest('button');
-  if (b) setFilter(b.dataset.f);
-});
-
-const COLLECTIONS = [
-  { f: 'epoksi', title: 'Epoksi Masalar', img: PRODUCTS['ocean-river-dogal-kenarli-ceviz-ahsap-epoksi-masa-mavi'].images[0] },
-  { f: 'yemek', title: 'Yemek Masaları', img: PRODUCTS['ceviz-kutuk-yemek-masasi-dogal-kenarli'].images[0] },
-  { f: 'calisma', title: 'Çalışma Masaları', img: PRODUCTS['linak-yukseklik-ayarli-masif-mese-calisma-masasi'].images[0] },
-  { f: 'sehpa', title: 'Orta ve Yan Sehpalar', img: PRODUCTS['masif-ahsap-mavi-epoksi-orta-sehpa'].images[0] },
-];
-$('#collections').innerHTML = COLLECTIONS.map(
-  (c) => `<button class="collection" data-filter="${c.f}">
-    <img src="${img(c.img, 700)}" alt="" loading="lazy" />
-    <span>${c.title} <i>→</i></span>
-  </button>`
-).join('');
-renderGrid();
-
 document.addEventListener('click', (e) => {
-  const f = e.target.closest('[data-filter]');
-  if (f) {
-    e.preventDefault();
-    setFilter(f.dataset.filter, true);
-    body.classList.remove('menu-open');
-  }
-  const gal = e.target.closest('[data-gallery]');
-  if (gal) openLightbox(PRODUCTS[gal.dataset.gallery], 0);
   const o = e.target.closest('[data-open3d]');
-  if (o) openInShowroom(o.dataset.open3d);
+  if (o) {
+    e.preventDefault();
+    openInShowroom(o.dataset.open3d);
+  }
   if (e.target.closest('[data-action="enter"]')) {
     body.classList.remove('menu-open');
     enterShowroom();
@@ -235,18 +139,22 @@ async function boot() {
 // ---------------------------------------------------------------------------
 async function enterShowroom() {
   if (engine.state !== 'landing') return;
+  if (body.dataset.page !== 'home') navigate('/', { keepScroll: true });
+  showShowroomSlide();
   scrollTo({ top: 0, behavior: 'instant' });
   body.classList.add('immersive');
-  history.replaceState(null, '', '#showroom');
+  history.replaceState(null, '', '/#showroom');
+  updatePause();
   await engine.enter();
   showHint();
 }
 
 async function exitShowroom() {
   closePanel(false);
-  history.replaceState(null, '', location.pathname);
+  history.replaceState(null, '', '/');
   await engine.exit();
   body.classList.remove('immersive');
+  updatePause();
 }
 $('#exitBtn').addEventListener('click', exitShowroom);
 
@@ -437,9 +345,9 @@ function renderPanel(i) {
       <p class="note">3D görünüm temsilîdir; masif ahşabın damar ve tonu her üründe farklıdır.</p>
     </div>
     <div class="panel-foot">
-      <a class="btn btn-dark ${v[6] ? '' : 'disabled'}" href="${v[6] ? addToCartUrl(v[0]) : '#'}" target="_blank" rel="noopener">Sepete ekle · ${formatTRY(v[4])}</a>
+      <button class="btn btn-dark ${v[6] ? '' : 'disabled'}" data-panel-add ${v[6] ? '' : 'disabled'}>Sepete ekle · ${formatTRY(v[4])}</button>
       <div class="foot-row">
-        <a class="btn btn-outline" href="${productUrl(p.handle, v[0])}" target="_blank" rel="noopener">Ürün sayfası</a>
+        <a class="btn btn-outline" href="/urun/${p.handle}" data-leave3d>Ürün sayfası</a>
         <a class="btn btn-outline" href="${wa}" target="_blank" rel="noopener">WhatsApp'tan sor</a>
       </div>
       <div class="panel-nav">
@@ -507,6 +415,18 @@ panel.addEventListener('click', (e) => {
     s.selected[o.dataset.opt] = o.dataset.val;
     applyBay(i);
     renderPanel(i);
+    return;
+  }
+  if (e.target.closest('[data-panel-add]')) {
+    const pr = PRODUCTS[s.handle];
+    return addToCart(pr.handle, findVariant(pr, s.selected), 1);
+  }
+  const leave = e.target.closest('[data-leave3d]');
+  if (leave) {
+    e.preventDefault();
+    e.stopPropagation();
+    const href = leave.getAttribute('href');
+    exitShowroom().then(() => navigate(href));
     return;
   }
   const ph = e.target.closest('[data-photo]');
@@ -616,10 +536,19 @@ addEventListener(
     topbar.classList.toggle('solid', scrollY > innerHeight * 0.75);
     $('#scene').style.opacity = body.classList.contains('immersive') ? 1 : String(1 - s * 0.6);
     // hero'nun altına inildiğinde sahne görünmez: çizimi durdur
-    engine.paused = !body.classList.contains('immersive') && scrollY > innerHeight * 1.15;
+    updatePause();
   },
   { passive: true }
 );
+
+function updatePause() {
+  const immersive = body.classList.contains('immersive');
+  engine.paused = !immersive && (scrollY > innerHeight * 1.15 || body.dataset.page !== 'home' || (body.dataset.slide && body.dataset.slide !== '0'));
+  $('#scene').classList.toggle('off', !immersive && body.dataset.page !== 'home');
+}
+
+initCart();
+initShop({ openLightbox: (prod, k) => openLightbox(prod, k), updatePause });
 
 boot().catch((err) => {
   console.error(err);
